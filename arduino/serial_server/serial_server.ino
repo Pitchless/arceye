@@ -2,6 +2,9 @@
   Simple serial server
 ****************************************************/
 
+// Pin 13 has an LED connected on most Arduino boards.
+int led_pin = 13;
+
 //serial
 String inputString = "";         // a string to hold incoming data
 boolean stringComplete = false;  // whether the string is complete
@@ -17,6 +20,7 @@ void setup(){
 void loop(){
   // print the string when a newline arrives:
   if (stringComplete) {
+    flash(200);
     Serial.println(inputString);
     // clear the string:
     inputString = "";
@@ -42,4 +46,11 @@ void serialEvent() {
       stringComplete = true;
     }
   }
+}
+
+// Flash the led for the given time (milliseconds)
+void flash(int msecs){
+    digitalWrite(led_pin, HIGH);
+    delay(msecs);
+    digitalWrite(led_pin, LOW);
 }
