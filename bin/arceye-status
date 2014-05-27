@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+import sys
+from serial import Serial, SerialException
+from time import sleep
+
+port = '/dev/ttyUSB0'
+
+def loginfo(*msg):
+    print("INFO:", *msg)
+
+def logerr(*msg):
+    print("ERROR:", *msg, file=sys.stderr)
+
+try:
+    ser = Serial(port, 9600)
+except SerialException as e:
+    logerr("Failed to connect to arduino serial. Is it plugged in?\n", e)
+    sys.exit(23)
+sleep(3) # wait for the board to reset
+loginfo("Connected to %s"%port)
+
+while True:
+    line = ser.readline()
+    print("STATUS %s"%line)
+    #sleep(1)
+
