@@ -54,6 +54,62 @@ except SerialException as e:
 sleep(3) # wait for the board to reset
 loginfo("Connected to %s"%port)
 
+class Joint(object):
+    def __init__(self, name):
+        self.name = name
+        self.command = 0
+        self.pos = 0
+
+    def get_pwm(self):
+        pwm = abs(self.command)
+        if pwm > 255:
+            pwm = 255
+        return pwm
+
+    def get_direction(self):
+        if self.command < 0:
+            return 0
+        return 1
+
+joints = {
+    "yaw": Joint("yaw"),
+    "pitch": Joint("pitch"),
+    "lid": Joint("lid"),
+}
+
+status = None
+
+def read_status():
+    global status
+    global joints
+    try:
+        status = ser.readline()
+        status = status.strip()
+        for stat in status.split(";"):
+            if not stat or stat == "":
+                continue
+            (name, value) = stat.split("=")
+            jname = "UnknownJoint"
+            if name == "yaw_pos":
+                jname = "yaw"
+            elif name == "pitch_pos":
+                jname = "pitch"
+            elif name == "lid_pos":
+                jname = "lid"
+            joints[jname].pos = value
+    except Exception as e:
+        logerr(e)
+
+def send_commands():
+    global joints
+    cmd = ""
+    cmd = "%s,%s,%s,%s,%s,%s\n"%(
+            joints["yaw"].get_pwm(), joints["yaw"].get_direction(),
+            joints["pitch"].get_pwm(), joints["pitch"].get_direction(),
+            joints["lid"].get_pwm(), joints["lid"].get_direction(),
+            )
+    ser.write(cmd)
+
 pygame.init()
 screen = pygame.display.set_mode( (640,480) )
 guitxt = TextPrint(screen)
@@ -73,13 +129,30 @@ while not done:
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
                 done = True
+        elif keys[pygame.K_a]:
+            joints['yaw'].command += 1
+        elif keys[pygame.K_d]:
+            joints['yaw'].command -= 1
+        elif keys[pygame.K_w]:
+            joints['pitch'].command += 1
+        elif keys[pygame.K_s]:
+            joints['pitch'].command -= 1
 
-        status = ser.readline()
+        read_status()
+
+        if num % 10 == 0:
+            send_commands()
 
         screen.fill((0,0,0))
         guitxt.reset()
         guitxt.text("Hello %s"%num)
         guitxt.text("Status %s"%status)
+        for j in joints.values():
+            guitxt.text(j.name)
+            guitxt.indent()
+            guitxt.text("Position: " + str(j.pos))
+            guitxt.text("Command: %s"%j.command)
+            guitxt.unindent()
 
         # Go ahead and update the screen with what we've drawn.
         pygame.display.flip()
