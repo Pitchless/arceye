@@ -41,12 +41,18 @@ float speedControl3 = 0; //store the current speed
 long previousMillis = 0;  // store the time LCD was last updated
 long interval = 50; // time setween lcd updates
 
+struct Status {
+  int yaw_pos;
+  int pitch_pos;
+  int lid_pos;
+};
+
+Status stat = { 0, 0, 0 };
 
 //serial
 String inputString = "";         // a string to hold incoming data
 boolean stringComplete = false;  // whether the string is complete
-
-
+String statusString = "";        // a string to hold the output
 
 void setup(){
   Wire.begin(); //start I2C bus
@@ -71,16 +77,21 @@ void setup(){
   
   
   //serial
-  
-    Serial.begin(9600);
+  Serial.begin(9600);
   // reserve 200 bytes for the inputString:
   inputString.reserve(200);
+  statusString.reserve(200);
 }
 
 void loop(){
-  direct1 = manualSpeedControl(motorPinSpeed1, potPin1, rlyPin1, motorPinDir1, direct1, speedControl1);
-  direct2 = manualSpeedControl(motorPinSpeed2, potPin2, rlyPin2, motorPinDir2, direct2, speedControl2);
-  direct3 = manualSpeedControl(motorPinSpeed3, potPin3, rlyPin3, motorPinDir3, direct3, speedControl3);
+  static unsigned long send_time = millis();
+  stat.pitch_pos = analogRead(potPin1);
+  stat.yaw_pos = analogRead(potPin2);
+  stat.lid_pos = analogRead(potPin3);  
+  
+  //direct1 = manualSpeedControl(motorPinSpeed1, potPin1, rlyPin1, motorPinDir1, direct1, speedControl1);
+  //direct2 = manualSpeedControl(motorPinSpeed2, potPin2, rlyPin2, motorPinDir2, direct2, speedControl2);
+  //direct3 = manualSpeedControl(motorPinSpeed3, potPin3, rlyPin3, motorPinDir3, direct3, speedControl3);
   
     // print the string when a newline arrives:
   if (stringComplete) {
@@ -90,9 +101,19 @@ void loop(){
     stringComplete = false;
   }
   
- 
+  if (millis() - send_time >= 10) {
+    send_time = millis();
+    send_status();
+  }
 }
 
+void send_status() {
+  statusString = "";
+  statusString += "yaw_pos=" + String(stat.yaw_pos) + ";";
+  statusString += "pitch_pos=" + String(stat.pitch_pos) + ";";
+  statusString += "lid_pos=" + String(stat.lid_pos) + ";";
+  Serial.println(statusString);
+}
 
 byte manualSpeedControl(int speedPin, byte potPin, int rlyPin, int dirPin, byte direct, int speedControl){
     int potVal = analogRead(potPin);
