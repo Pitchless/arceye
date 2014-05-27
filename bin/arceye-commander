@@ -74,9 +74,13 @@ while not done:
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
                 done = True
+
+        status = ser.readline()
+
         screen.fill((0,0,0))
         guitxt.reset()
         guitxt.text("Hello %s"%num)
+        guitxt.text(status)
 
         # Go ahead and update the screen with what we've drawn.
         pygame.display.flip()
