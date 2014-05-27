@@ -47,8 +47,7 @@ class TextPrint:
         self.x -= 10
 
 try:
-    #ser = Serial(port, 9600)
-    pass
+    ser = Serial(port, 9600)
 except SerialException as e:
     logerr("Failed to connect to arduino serial. Is it plugged in?\n", e)
     sys.exit(23)
@@ -80,9 +79,9 @@ while not done:
         screen.fill((0,0,0))
         guitxt.reset()
         guitxt.text("Hello %s"%num)
-        guitxt.text(status)
+        guitxt.text("Status %s"%status)
 
         # Go ahead and update the screen with what we've drawn.
         pygame.display.flip()
         # Limit to 20 frames per second
-        clock.tick(20)
+        #clock.tick(20)
