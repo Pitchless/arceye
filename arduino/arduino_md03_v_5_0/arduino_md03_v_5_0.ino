@@ -47,7 +47,18 @@ struct Status {
   int lid_pos;
 };
 
+// 0..255
+struct Command {
+  int yaw_pwm;
+  boolean yaw_direction;
+  int pitch_pwm;
+  boolean pitch_direction;
+  int lid_pwm;
+  boolean lid_direction;
+};
+
 Status stat = { 0, 0, 0 };
+Command cmd = { 0, true, 0, true, 0, true };
 
 //serial
 String inputString = "";         // a string to hold incoming data
@@ -75,7 +86,6 @@ void setup(){
   delay(30);
   //lcd.clear();
   
-  
   //serial
   Serial.begin(9600);
   // reserve 200 bytes for the inputString:
@@ -85,21 +95,18 @@ void setup(){
 
 void loop(){
   static unsigned long send_time = millis();
-  stat.pitch_pos = analogRead(potPin1);
-  stat.yaw_pos = analogRead(potPin2);
-  stat.lid_pos = analogRead(potPin3);  
+  read_status();
   
+  // read commands when we get a full line
+  if (stringComplete) {
+    read_command();
+    lcd_command();
+    do_command();
+  }
+
   //direct1 = manualSpeedControl(motorPinSpeed1, potPin1, rlyPin1, motorPinDir1, direct1, speedControl1);
   //direct2 = manualSpeedControl(motorPinSpeed2, potPin2, rlyPin2, motorPinDir2, direct2, speedControl2);
   //direct3 = manualSpeedControl(motorPinSpeed3, potPin3, rlyPin3, motorPinDir3, direct3, speedControl3);
-  
-    // print the string when a newline arrives:
-  if (stringComplete) {
-    Serial.println(inputString); 
-    // clear the string:
-    inputString = "";
-    stringComplete = false;
-  }
   
   if (millis() - send_time >= 10) {
     send_time = millis();
@@ -107,11 +114,78 @@ void loop(){
   }
 }
 
+void read_status() {
+  stat.pitch_pos = analogRead(potPin1);
+  stat.yaw_pos = analogRead(potPin2);
+  stat.lid_pos = analogRead(potPin3);  
+}
+
+void read_command() {
+  String  message = inputString; // holds text not yet split
+  int     delimPosition;  // the position of the next delim in the string
+  inputString = "";
+  stringComplete = false;
+  int i = 0;
+  do
+  {
+      String value;
+      delimPosition = message.indexOf(',');
+      if(delimPosition != -1)
+      {
+          value = message.substring(0,delimPosition);
+          message = message.substring(delimPosition+1, message.length());
+      }
+      else
+      {  // here after the last comma is found
+         if(message.length() > 0)
+           value = message;  // if there is text after the last comma
+      }
+      switch (i) {
+        case 0:
+          cmd.yaw_pwm = value.toInt();
+          break;
+        case 1:
+          cmd.yaw_direction = (value == "1" ? HIGH : LOW);
+          break;
+        case 2:
+          cmd.pitch_pwm = value.toInt();
+          break;
+        case 3:
+          cmd.pitch_direction = (value == "1" ? HIGH : LOW);
+          break;
+        case 4:
+          cmd.lid_pwm = value.toInt();
+          break;
+        case 5:
+          cmd.lid_direction = (value == "1" ? HIGH : LOW);
+          break;
+        default:
+          break;
+      }
+      i++;
+   }
+   while(delimPosition >=0);
+}
+
+void lcd_command() {
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Y"+String(cmd.yaw_pwm)+" "+String(cmd.yaw_direction));
+}
+
+// Send command to the motors
+void do_command() {
+  analogWrite(motorPinSpeed1, cmd.pitch_pwm);
+  digitalWrite(motorPinDir1, cmd.pitch_direction);
+  analogWrite(motorPinSpeed2, cmd.yaw_pwm);
+  digitalWrite(motorPinDir2, cmd.yaw_direction);
+}
+
 void send_status() {
   statusString = "";
   statusString += "yaw_pos=" + String(stat.yaw_pos) + ";";
   statusString += "pitch_pos=" + String(stat.pitch_pos) + ";";
-  statusString += "lid_pos=" + String(stat.lid_pos) + ";";
+  statusString += "lid_pos=" + String(stat.lid_pos);
   Serial.println(statusString);
 }
 
