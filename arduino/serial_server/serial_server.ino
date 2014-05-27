@@ -9,23 +9,40 @@ int led_pin = 13;
 String inputString = "";         // a string to hold incoming data
 boolean stringComplete = false;  // whether the string is complete
 
+String statusString = "";         // a string to hold outgoing data
+
 void setup(){
   //delay(100); //wait for bus to stabalise
   // serial
   Serial.begin(9600);
   // reserve 200 bytes for the inputString:
   inputString.reserve(200);
+  statusString.reserve(200);
 }
 
 void loop(){
+  static unsigned long send_time = millis();
+
   // print the string when a newline arrives:
   if (stringComplete) {
-    flash(200);
     Serial.println(inputString);
     // clear the string:
     inputString = "";
     stringComplete = false;
   }
+
+  if (millis() - send_time >= 10)
+  {
+    send_time = millis();
+    send_status();
+  }
+}
+
+// Send back our status down the serial link. Called by the main loop.
+void send_status(){
+    flash(1);
+    statusString = "hello";
+    Serial.println(statusString);
 }
 
 /*
@@ -54,3 +71,4 @@ void flash(int msecs){
     delay(msecs);
     digitalWrite(led_pin, LOW);
 }
+
