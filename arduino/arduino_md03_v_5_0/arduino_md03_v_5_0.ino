@@ -195,7 +195,10 @@ void read_command() {
 void lcd_command() {
   lcd.clear();
   lcd.setCursor(0,0);
-  lcd.print("Y"+String(cmd.yaw_pwm)+" "+String(cmd.yaw_direction));
+  lcd.print(
+          "Y"+String(cmd.yaw_pwm)+" "+String(cmd.yaw_direction)
+          +" L"+String(cmd.lid_pwm)+" "+String(cmd.lid_direction)
+          );
 }
 
 // Send command to the motors
@@ -204,6 +207,8 @@ void do_command() {
   digitalWrite(motorPinDir1, cmd.pitch_direction);
   analogWrite(motorPinSpeed2, cmd.yaw_pwm);
   digitalWrite(motorPinDir2, cmd.yaw_direction);
+  analogWrite(motorPinSpeed3, cmd.lid_pwm);
+  digitalWrite(motorPinDir3, cmd.lid_direction);
 
   // Brakes
   digitalWrite(rlyPin2, cmd.yaw_brake);

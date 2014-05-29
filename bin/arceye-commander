@@ -117,9 +117,10 @@ def send_commands():
     cmd = ""
     cmd = "%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(
             joints["yaw"].get_pwm(), joints["yaw"].get_direction(), joints["yaw"].get_brake_cmd(),
-            joints["pitch"].get_pwm(), joints["pitch"].get_direction(), joints["yaw"].get_brake_cmd(),
-            joints["lid"].get_pwm(), joints["lid"].get_direction(), joints["yaw"].get_brake_cmd(),
+            joints["pitch"].get_pwm(), joints["pitch"].get_direction(), joints["pitch"].get_brake_cmd(),
+            joints["lid"].get_pwm(), joints["lid"].get_direction(), joints["lid"].get_brake_cmd(),
             )
+    print("CMD:%s"%cmd)
     ser.write(cmd)
 
 def dead_zoned(val, dead_zone=dead_zone):
