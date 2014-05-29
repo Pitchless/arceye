@@ -7,6 +7,9 @@ from time import sleep
 import pygame
 
 port = '/dev/ttyUSB0'
+dead_zone = 0.1
+# Used to scale the joystick axis
+max_pwm = 100
 
 def loginfo(*msg):
     print("INFO:", *msg)
@@ -112,8 +115,24 @@ def send_commands():
             )
     ser.write(cmd)
 
+def dead_zoned(val, dead_zone=dead_zone):
+    if val > -dead_zone and val < dead_zone:
+        return 0
+    return val
+
 pygame.init()
 screen = pygame.display.set_mode( (640,480) )
+pygame.display.set_caption("ArcEye")
+
+joystick = None
+pygame.joystick.init()
+try:
+    joystick = pygame.joystick.Joystick(0)
+    joystick.init()
+    loginfo("Joystick 0")
+except pygame.error as e:
+    logerr("Joystick fail %s"%e)
+
 guitxt = TextPrint(screen)
 pygame.display.set_caption('Python numbers')
 screen.fill((159, 182, 205))
@@ -128,6 +147,15 @@ while not done:
         for event in pygame.event.get(): # User did something
             if event.type == pygame.QUIT: # If user clicked close
                 done=True # Flag that we are done so we exit this loop
+            elif event.type == pygame.JOYAXISMOTION:
+                joints['yaw'].command = dead_zoned(joystick.get_axis(0)) * max_pwm;
+                joints['pitch'].command = dead_zoned(joystick.get_axis(1)) * max_pwm;
+                joints['lid'].command = dead_zoned(joystick.get_axis(2)) * max_pwm;
+            if event.type == pygame.JOYBUTTONDOWN:
+                print("Joystick button pressed.")
+            if event.type == pygame.JOYBUTTONUP:
+                print("Joystick button released.")
+
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
                 done = True
