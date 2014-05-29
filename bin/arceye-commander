@@ -124,7 +124,7 @@ def dead_zoned(val, dead_zone=dead_zone):
     return val
 
 pygame.init()
-screen = pygame.display.set_mode( (640,480) )
+screen = pygame.display.set_mode( (320,240) )
 pygame.display.set_caption("ArcEye")
 
 joystick = None
