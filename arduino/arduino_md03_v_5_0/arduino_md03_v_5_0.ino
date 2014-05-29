@@ -60,6 +60,17 @@ struct Command {
 Status stat = { 0, 0, 0 };
 Command cmd = { 0, true, 0, true, 0, true };
 
+//struct Joint {
+//  String name;
+//  int pos;
+//  int command;
+//  boolean brake;
+//}
+//
+//Joint yaw = { "Yaw", 0, 0, LOW };
+//Joint pitch = { "Pitch", 0, 0, LOW };
+//Joint lid = { "Lid", 0, 0, LOW };
+
 //serial
 String inputString = "";         // a string to hold incoming data
 boolean stringComplete = false;  // whether the string is complete
