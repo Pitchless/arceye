@@ -11,6 +11,9 @@ dead_zone = 0.1
 # Used to scale the joystick axis
 max_pwm = 100
 
+# 1 same as status from arduino (glitchy!). 4 = every 4 statuses etc
+command_rate = 4
+
 def loginfo(*msg):
     print("INFO:", *msg)
 
@@ -185,7 +188,7 @@ while not done:
 
         read_status()
 
-        if num % 10 == 0:
+        if num % command_rate == 0:
             send_commands()
 
         screen.fill((0,0,0))
