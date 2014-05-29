@@ -7,6 +7,10 @@ from time import sleep
 import pygame
 
 port = '/dev/ttyUSB0'
+# Read port from command line if set
+if len(sys.argv) > 1:
+    port = sys.argv[1]
+
 dead_zone = 0.1
 # Used to scale the joystick axis
 max_pwm = 100
