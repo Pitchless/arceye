@@ -121,6 +121,9 @@ while not done:
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
                 done = True
+        elif keys[pygame.K_SPACE]:
+            for j in joints.values():
+                j.command = 0
         elif keys[pygame.K_a]:
             joints['yaw'].command += 1
         elif keys[pygame.K_d]:
