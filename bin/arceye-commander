@@ -14,14 +14,6 @@ def loginfo(*msg):
 def logerr(*msg):
     print("ERROR:", *msg, file=sys.stderr)
 
-def display(str):
-        text = font.render(str, True, (255, 255, 255), (159, 182, 205))
-        textRect = text.get_rect()
-        textRect.centerx = screen.get_rect().centerx
-        textRect.centery = screen.get_rect().centery
-        screen.blit(text, textRect)
-        pygame.display.update()
-
 # This is a simple class that will help us print to the screen
 class TextPrint:
     def __init__(self, screen):
