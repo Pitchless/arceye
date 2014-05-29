@@ -51,8 +51,13 @@ class Joint(object):
         self.name = name
         self.command = 0
         self.pos = 0
+        #self.brake_state = None
+        self.brake_cmd = 0
 
     def get_pwm(self):
+        # Dont try to drive motors while breaking
+        if self.brake_cmd:
+            return 0
         pwm = abs(self.command)
         if pwm > 255:
             pwm = 255
@@ -62,6 +67,11 @@ class Joint(object):
         if self.command < 0:
             return 0
         return 1
+
+    def get_brake_cmd(self):
+        if self.brake_cmd:
+            return 1
+        return 0
 
 joints = {
     "yaw": Joint("yaw"),
@@ -95,10 +105,10 @@ def read_status():
 def send_commands():
     global joints
     cmd = ""
-    cmd = "%s,%s,%s,%s,%s,%s\n"%(
-            joints["yaw"].get_pwm(), joints["yaw"].get_direction(),
-            joints["pitch"].get_pwm(), joints["pitch"].get_direction(),
-            joints["lid"].get_pwm(), joints["lid"].get_direction(),
+    cmd = "%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(
+            joints["yaw"].get_pwm(), joints["yaw"].get_direction(), joints["yaw"].get_brake_cmd(),
+            joints["pitch"].get_pwm(), joints["pitch"].get_direction(), joints["yaw"].get_brake_cmd(),
+            joints["lid"].get_pwm(), joints["lid"].get_direction(), joints["yaw"].get_brake_cmd(),
             )
     ser.write(cmd)
 
@@ -132,6 +142,18 @@ while not done:
             joints['pitch'].command += 1
         elif keys[pygame.K_s]:
             joints['pitch'].command -= 1
+        elif keys[pygame.K_r]:
+            joints['yaw'].brake_cmd = 1
+        elif keys[pygame.K_f]:
+            joints['yaw'].brake_cmd = 0
+        elif keys[pygame.K_t]:
+            joints['pitch'].brake_cmd = 1
+        elif keys[pygame.K_g]:
+            joints['pitch'].brake_cmd = 0
+        elif keys[pygame.K_y]:
+            joints['lid'].brake_cmd = 1
+        elif keys[pygame.K_h]:
+            joints['lid'].brake_cmd = 0
 
         read_status()
 
@@ -147,6 +169,7 @@ while not done:
             guitxt.indent()
             guitxt.text("Position: " + str(j.pos))
             guitxt.text("Command: %s"%j.command)
+            guitxt.text("Brake: %s"%j.brake_cmd)
             guitxt.unindent()
 
         # Go ahead and update the screen with what we've drawn.

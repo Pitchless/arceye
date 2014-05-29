@@ -51,14 +51,18 @@ struct Status {
 struct Command {
   int yaw_pwm;
   boolean yaw_direction;
+  boolean yaw_brake;
   int pitch_pwm;
   boolean pitch_direction;
+  boolean pitch_brake;
   int lid_pwm;
   boolean lid_direction;
+  boolean lid_brake;
+
 };
 
 Status stat = { 0, 0, 0 };
-Command cmd = { 0, true, 0, true, 0, true };
+Command cmd = { 0, true, 0, true, 0, true, LOW };
 
 //struct Joint {
 //  String name;
@@ -159,16 +163,25 @@ void read_command() {
           cmd.yaw_direction = (value == "1" ? HIGH : LOW);
           break;
         case 2:
-          cmd.pitch_pwm = value.toInt();
+          cmd.yaw_brake = (value == "1" ? HIGH : LOW);
           break;
         case 3:
-          cmd.pitch_direction = (value == "1" ? HIGH : LOW);
+          cmd.pitch_pwm = value.toInt();
           break;
         case 4:
-          cmd.lid_pwm = value.toInt();
+          cmd.pitch_direction = (value == "1" ? HIGH : LOW);
           break;
         case 5:
+          cmd.pitch_brake = (value == "1" ? HIGH : LOW);
+          break;
+        case 6:
+          cmd.lid_pwm = value.toInt();
+          break;
+        case 7:
           cmd.lid_direction = (value == "1" ? HIGH : LOW);
+          break;
+        case 8:
+          cmd.lid_brake = (value == "1" ? HIGH : LOW);
           break;
         default:
           break;
@@ -178,6 +191,7 @@ void read_command() {
    while(delimPosition >=0);
 }
 
+// Debug: Show current commands on lcd
 void lcd_command() {
   lcd.clear();
   lcd.setCursor(0,0);
@@ -190,6 +204,11 @@ void do_command() {
   digitalWrite(motorPinDir1, cmd.pitch_direction);
   analogWrite(motorPinSpeed2, cmd.yaw_pwm);
   digitalWrite(motorPinDir2, cmd.yaw_direction);
+
+  // Brakes
+  digitalWrite(rlyPin2, cmd.yaw_brake);
+  digitalWrite(rlyPin1, cmd.pitch_brake);
+  digitalWrite(rlyPin3, cmd.lid_brake);
 }
 
 void send_status() {
