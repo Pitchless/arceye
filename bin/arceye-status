@@ -6,6 +6,8 @@ from serial import Serial, SerialException
 from time import sleep
 
 port = '/dev/ttyUSB0'
+if len(sys.argv) > 1:
+    port = sys.argv[1]
 
 def loginfo(*msg):
     print("INFO:", *msg)
