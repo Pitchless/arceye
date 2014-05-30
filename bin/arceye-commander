@@ -121,12 +121,20 @@ class PID:
 class Joint(object):
     """A single joint on the eye (yaw, pitch, lid), covers sensor and motor."""
     def __init__(self, name):
-        self.name      = name
-        self.command   = 0
-        self.pos       = 0
-        self.brake_cmd = 0
-        self.active    = False
-        self.pid       = PID()
+        self.name       = name
+        self.command    = 0
+        self.pos        = 0
+        self.pos_raw    = 0
+        self.pos_center = 0
+        self.pos_min    = -100
+        self.pos_max    = 100
+        self.brake_cmd  = 0
+        self.active     = False
+        self.pid        = PID()
+
+    def set_pos_raw(self, v):
+        self.pos_raw = v
+        self.pos = v - self.pos_center
 
     @property
     def target(self):
@@ -218,7 +226,8 @@ class ArcEye(object):
                 else:
                     logerr("Unknown joint in status %s"%name)
                     continue
-                joint.pos = float(value)
+                #joint.pos = float(value)
+                joint.set_pos_raw(float(value))
         except Exception as e:
             logerr(e)
 
@@ -276,12 +285,18 @@ def joint_ui_command(joint,val):
 
 # Start the eye
 eye = ArcEye(port)
+eye.yaw.pos_center = 353
+eye.yaw.pos_max = 250
+eye.yaw.pos_min = 490
+eye.pitch.pos_center = 464
+eye.pitch.pos_max = 900
+eye.pitch.pos_min = 300
 eye.connect()
 
 # Start the gui
 pygame.init()
 pygame.display.set_caption("ArcEye")
-screen = pygame.display.set_mode( (320,420) )
+screen = pygame.display.set_mode( (320,460) )
 screen.fill((0, 0, 0))
 guitxt = TextPrint(screen)
 
@@ -368,6 +383,7 @@ while not done:
         for j in eye.all_joints():
             guitxt.text(j.name)
             guitxt.indent()
+            guitxt.text("Pos raw: " + str(j.pos_raw))
             guitxt.text("Position: " + str(j.pos))
             guitxt.text("Command: %s"%j.command)
             guitxt.text("Brake: %s"%j.brake_cmd)
