@@ -102,7 +102,7 @@ void setup(){
   //lcd.clear();
   
   //serial
-  Serial.begin(9600);
+  Serial.begin(115200);
   // reserve 200 bytes for the inputString:
   inputString.reserve(200);
   statusString.reserve(200);

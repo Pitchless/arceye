@@ -205,7 +205,7 @@ class ArcEye(object):
 
     def connect(self):
         try:
-            self.ser = Serial(port, 9600)
+            self.ser = Serial(port, 115200)
         except SerialException as e:
             logerr("Failed to connect to arduino serial. Is it plugged in?\n", e)
             return False
