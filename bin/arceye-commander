@@ -45,7 +45,7 @@ class PID:
     Discrete PID control
     """
 
-    def __init__(self, P=2.0, I=0.0, D=1.0, Derivator=0, Integrator=0, Integrator_max=500, Integrator_min=-500):
+    def __init__(self, P=1.0, I=0.0, D=1.0, Derivator=0, Integrator=0, Integrator_max=500, Integrator_min=-500):
 
         self.Kp=P
         self.Ki=I
@@ -123,6 +123,7 @@ class Joint(object):
     def __init__(self, name):
         self.name       = name
         self.command    = 0
+        self.pwm_limit = 255
         self.pos        = 0
         self.pos_raw    = 0
         self.pos_center = 0
@@ -161,8 +162,8 @@ class Joint(object):
         if self.brake_cmd:
             return 0
         pwm = abs(self.command)
-        if pwm > 255:
-            pwm = 255
+        if pwm > self.pwm_limit:
+            pwm = self.pwm_limit
         return pwm
 
     def get_direction(self):
@@ -179,6 +180,11 @@ class Joint(object):
         if not self.active:
             return
         cmd = self.pid.update(self.pos)
+        if self.pos >= self.pos_max and cmd > 0:
+            # Ignore positive commands over the max
+            cmd = 0
+        elif self.pos <= self.pos_min and cmd < 0:
+            cmd = 0
         self.command = cmd
 
 class ArcEye(object):
@@ -285,12 +291,15 @@ def joint_ui_command(joint,val):
 
 # Start the eye
 eye = ArcEye(port)
-eye.yaw.pos_center = 353
-eye.yaw.pos_max = 250
-eye.yaw.pos_min = 490
-eye.pitch.pos_center = 464
-eye.pitch.pos_max = 900
-eye.pitch.pos_min = 300
+eye.yaw.pwm_limit = 40
+eye.yaw.pos_center = 353 # raw
+eye.yaw.pos_max = 120 # scaled
+eye.yaw.pos_min = -100 # scaled
+eye.yaw.pid.setKp(0.2)
+eye.pitch.pwm_limit = 70
+eye.pitch.pos_center = 484
+eye.pitch.pos_max = 400
+eye.pitch.pos_min = -200
 eye.connect()
 
 # Start the gui
@@ -386,6 +395,7 @@ while not done:
             guitxt.text("Pos raw: " + str(j.pos_raw))
             guitxt.text("Position: " + str(j.pos))
             guitxt.text("Command: %s"%j.command)
+            guitxt.text("PWM: %s Dir:%s"%(j.get_pwm(),j.get_direction()))
             guitxt.text("Brake: %s"%j.brake_cmd)
             guitxt.text("Active: %s"%j.active)
             guitxt.indent()
