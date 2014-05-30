@@ -13,7 +13,9 @@ if len(sys.argv) > 1:
 
 dead_zone = 0.1
 # Used to scale the joystick axis
-max_pwm = 100
+max_pwm_yaw = 50
+max_pwm_pitch = 50
+max_pwm_lid = 120
 
 # 1 same as status from arduino (glitchy!). 4 = every 4 statuses etc
 command_rate = 4
@@ -174,9 +176,9 @@ while not done:
             if event.type == pygame.QUIT: # If user clicked close
                 done=True # Flag that we are done so we exit this loop
             elif event.type == pygame.JOYAXISMOTION:
-                eye.yaw.command = dead_zoned(joystick.get_axis(0)) * max_pwm;
-                eye.pitch.command = dead_zoned(joystick.get_axis(1)) * max_pwm;
-                eye.lid.command = dead_zoned(joystick.get_axis(2)) * max_pwm;
+                eye.yaw.command = dead_zoned(joystick.get_axis(0)) * max_pwm_yaw;
+                eye.pitch.command = dead_zoned(joystick.get_axis(1)) * max_pwm_pitch;
+                eye.lid.command = dead_zoned(joystick.get_axis(2)) * max_pwm_lid;
             if event.type == pygame.JOYBUTTONDOWN:
                 print("Joystick button pressed.")
             if event.type == pygame.JOYBUTTONUP:
