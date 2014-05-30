@@ -291,7 +291,7 @@ def joint_ui_command(joint,val):
 
 # Start the eye
 eye = ArcEye(port)
-eye.yaw.pwm_limit = 40
+eye.yaw.pwm_limit = 50
 eye.yaw.pos_center = 353 # raw
 eye.yaw.pos_max = 120 # scaled
 eye.yaw.pos_min = -100 # scaled
