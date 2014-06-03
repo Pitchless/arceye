@@ -273,7 +273,7 @@ eye.connect()
 # Start the gui
 pygame.init()
 pygame.display.set_caption("ArcEye")
-screen = pygame.display.set_mode( (320,400) )
+screen = pygame.display.set_mode( (320,420) )
 screen.fill((0, 0, 0))
 guitxt = TextPrint(screen)
 
@@ -364,6 +364,7 @@ while not done:
             guitxt.indent()
             guitxt.text("Target: %s"%j.target)
             guitxt.text("Error: %s"%j.error)
+            guitxt.text("P:%s I:%s D:%s"%(j.pid.Kp, j.pid.Ki, j.pid.Kd))
             guitxt.unindent()
             guitxt.unindent()
 
