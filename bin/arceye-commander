@@ -26,11 +26,11 @@ def logerr(*msg):
 
 
 class Joint(object):
+    """A single joint on the eye (yaw, pitch, lid), covers sensor and motor."""
     def __init__(self, name):
-        self.name = name
-        self.command = 0
-        self.pos = 0
-        #self.brake_state = None
+        self.name      = name
+        self.command   = 0
+        self.pos       = 0
         self.brake_cmd = 0
 
     def get_pwm(self):
@@ -53,12 +53,17 @@ class Joint(object):
         return 0
 
 class ArcEye(object):
+    """
+    Object representing a complete eye, which it connects to over the serial
+    link to the arduino. Recieves status and sends commands. Manages a set of
+    Joint objects for the yaw, pitch and lid joints.
+    """
     def __init__(self, port="/dev/ttyUSB0"):
-        self.port = port
+        self.port   = port
         self.status = None
-        self.yaw   = Joint("yaw")
-        self.pitch = Joint("pitch")
-        self.lid   = Joint("lid")
+        self.yaw    = Joint("yaw")
+        self.pitch  = Joint("pitch")
+        self.lid    = Joint("lid")
 
     def all_joints(self):
         return (self.yaw, self.pitch, self.lid)
@@ -106,13 +111,13 @@ class ArcEye(object):
         self.ser.write(cmd)
 
 
-# This is a simple class that will help us print to the screen
+# This is a simple pygame class that will help us print to the screen
 class TextPrint:
-    def __init__(self, screen):
+    def __init__(self, screen, text_color=(0,255,0), font=None):
         self.reset()
-        self.screen = screen
-        self.font = pygame.font.Font(None, 20)
-        self.text_color = (0,255,0)
+        self.screen     = screen
+        self.font       = pygame.font.Font(None, 20) if not font else font
+        self.text_color = text_color
 
     def text(self, textString):
         textBitmap = self.font.render(textString, True, self.text_color)
@@ -130,19 +135,26 @@ class TextPrint:
     def unindent(self):
         self.x -= 10
 
+
+# Util func to clamp a value in a deadzone
 def dead_zoned(val, dead_zone=dead_zone):
     if val > -dead_zone and val < dead_zone:
         return 0
     return val
 
 
+# Start the eye
 eye = ArcEye(port)
 eye.connect()
 
+# Start the gui
 pygame.init()
-screen = pygame.display.set_mode( (320,240) )
 pygame.display.set_caption("ArcEye")
+screen = pygame.display.set_mode( (320,240) )
+screen.fill((0, 0, 0))
+guitxt = TextPrint(screen)
 
+# Grab the joystick
 joystick = None
 pygame.joystick.init()
 try:
@@ -152,16 +164,11 @@ try:
 except pygame.error as e:
     logerr("Joystick fail %s"%e)
 
-guitxt = TextPrint(screen)
-pygame.display.set_caption('Python numbers')
-screen.fill((159, 182, 205))
-font = pygame.font.Font(None, 17)
-# Used to manage how fast the screen updates
-clock = pygame.time.Clock()
-num = 0
+# Main loop
+frame = 0
 done = False
 while not done:
-        num += 1
+        frame += 1
         #pygame.event.pump()
         for event in pygame.event.get(): # User did something
             if event.type == pygame.QUIT: # If user clicked close
@@ -204,13 +211,14 @@ while not done:
 
         eye.read_status()
 
-        if num % command_rate == 0:
+        if frame % command_rate == 0:
             eye.send_commands()
 
         screen.fill((0,0,0))
         guitxt.reset()
-        guitxt.text("Hello %s"%num)
-        guitxt.text("Status %s"%eye.status)
+        guitxt.text("Frame: %s"%frame)
+        #guitxt.text("Status %s"%eye.status)
+        guitxt.text("")
         for j in eye.all_joints():
             guitxt.text(j.name)
             guitxt.indent()
@@ -221,5 +229,3 @@ while not done:
 
         # Go ahead and update the screen with what we've drawn.
         pygame.display.flip()
-        # Limit to 20 frames per second
-        #clock.tick(20)
