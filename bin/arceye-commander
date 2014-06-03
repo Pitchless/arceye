@@ -48,14 +48,6 @@ class TextPrint:
     def unindent(self):
         self.x -= 10
 
-try:
-    ser = Serial(port, 9600)
-except SerialException as e:
-    logerr("Failed to connect to arduino serial. Is it plugged in?\n", e)
-    sys.exit(23)
-sleep(3) # wait for the board to reset
-loginfo("Connected to %s"%port)
-
 class Joint(object):
     def __init__(self, name):
         self.name = name
@@ -83,50 +75,63 @@ class Joint(object):
             return 1
         return 0
 
-joints = {
-    "yaw": Joint("yaw"),
-    "pitch": Joint("pitch"),
-    "lid": Joint("lid"),
-}
+class ArcEye(object):
+    def __init__(self, port="/dev/ttyUSB0"):
+        self.port = port
+        self.status = None
+        self.joints = {
+            "yaw": Joint("yaw"),
+            "pitch": Joint("pitch"),
+            "lid": Joint("lid"),
+        }
 
-status = None
+    def connect(self):
+        try:
+            self.ser = Serial(port, 9600)
+        except SerialException as e:
+            logerr("Failed to connect to arduino serial. Is it plugged in?\n", e)
+            return False
+        sleep(3) # wait for the board to reset
+        loginfo("Connected to %s"%port)
+        return True
 
-def read_status():
-    global status
-    global joints
-    try:
-        status = ser.readline()
-        status = status.strip()
-        for stat in status.split(";"):
-            if not stat or stat == "":
-                continue
-            (name, value) = stat.split("=")
-            jname = "UnknownJoint"
-            if name == "yaw_pos":
-                jname = "yaw"
-            elif name == "pitch_pos":
-                jname = "pitch"
-            elif name == "lid_pos":
-                jname = "lid"
-            joints[jname].pos = value
-    except Exception as e:
-        logerr(e)
+    def read_status(self):
+        try:
+            self.status = self.ser.readline()
+            self.status = self.status.strip()
+            for stat in self.status.split(";"):
+                if not stat or stat == "":
+                    continue
+                (name, value) = stat.split("=")
+                jname = "UnknownJoint"
+                if name == "yaw_pos":
+                    jname = "yaw"
+                elif name == "pitch_pos":
+                    jname = "pitch"
+                elif name == "lid_pos":
+                    jname = "lid"
+                self.joints[jname].pos = value
+        except Exception as e:
+            logerr(e)
 
-def send_commands():
-    global joints
-    cmd = ""
-    cmd = "%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(
-            joints["yaw"].get_pwm(), joints["yaw"].get_direction(), joints["yaw"].get_brake_cmd(),
-            joints["pitch"].get_pwm(), joints["pitch"].get_direction(), joints["pitch"].get_brake_cmd(),
-            joints["lid"].get_pwm(), joints["lid"].get_direction(), joints["lid"].get_brake_cmd(),
-            )
-    print("CMD:%s"%cmd)
-    ser.write(cmd)
+    def send_commands(self):
+        cmd = ""
+        cmd = "%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(
+            self.joints["yaw"].get_pwm(), self.joints["yaw"].get_direction(), self.joints["yaw"].get_brake_cmd(),
+            self.joints["pitch"].get_pwm(), self.joints["pitch"].get_direction(), self.joints["pitch"].get_brake_cmd(),
+            self.joints["lid"].get_pwm(), self.joints["lid"].get_direction(), self.joints["lid"].get_brake_cmd(),
+                )
+        print("CMD:%s"%cmd)
+        self.ser.write(cmd)
 
 def dead_zoned(val, dead_zone=dead_zone):
     if val > -dead_zone and val < dead_zone:
         return 0
     return val
+
+
+eye = ArcEye(port)
+eye.connect()
 
 pygame.init()
 screen = pygame.display.set_mode( (320,240) )
@@ -156,9 +161,9 @@ while not done:
             if event.type == pygame.QUIT: # If user clicked close
                 done=True # Flag that we are done so we exit this loop
             elif event.type == pygame.JOYAXISMOTION:
-                joints['yaw'].command = dead_zoned(joystick.get_axis(0)) * max_pwm;
-                joints['pitch'].command = dead_zoned(joystick.get_axis(1)) * max_pwm;
-                joints['lid'].command = dead_zoned(joystick.get_axis(2)) * max_pwm;
+                eye.joints['yaw'].command = dead_zoned(joystick.get_axis(0)) * max_pwm;
+                eye.joints['pitch'].command = dead_zoned(joystick.get_axis(1)) * max_pwm;
+                eye.joints['lid'].command = dead_zoned(joystick.get_axis(2)) * max_pwm;
             if event.type == pygame.JOYBUTTONDOWN:
                 print("Joystick button pressed.")
             if event.type == pygame.JOYBUTTONUP:
@@ -168,39 +173,39 @@ while not done:
         if keys[pygame.K_ESCAPE]:
                 done = True
         elif keys[pygame.K_SPACE]:
-            for j in joints.values():
+            for j in eye.joints.values():
                 j.command = 0
         elif keys[pygame.K_a]:
-            joints['yaw'].command += 1
+            eye.joints['yaw'].command += 1
         elif keys[pygame.K_d]:
-            joints['yaw'].command -= 1
+            eye.joints['yaw'].command -= 1
         elif keys[pygame.K_w]:
-            joints['pitch'].command += 1
+            eye.joints['pitch'].command += 1
         elif keys[pygame.K_s]:
-            joints['pitch'].command -= 1
+            eye.joints['pitch'].command -= 1
         elif keys[pygame.K_r]:
-            joints['yaw'].brake_cmd = 1
+            eye.joints['yaw'].brake_cmd = 1
         elif keys[pygame.K_f]:
-            joints['yaw'].brake_cmd = 0
+            eye.joints['yaw'].brake_cmd = 0
         elif keys[pygame.K_t]:
-            joints['pitch'].brake_cmd = 1
+            eye.joints['pitch'].brake_cmd = 1
         elif keys[pygame.K_g]:
-            joints['pitch'].brake_cmd = 0
+            eye.joints['pitch'].brake_cmd = 0
         elif keys[pygame.K_y]:
-            joints['lid'].brake_cmd = 1
+            eye.joints['lid'].brake_cmd = 1
         elif keys[pygame.K_h]:
-            joints['lid'].brake_cmd = 0
+            eye.joints['lid'].brake_cmd = 0
 
-        read_status()
+        eye.read_status()
 
         if num % command_rate == 0:
-            send_commands()
+            eye.send_commands()
 
         screen.fill((0,0,0))
         guitxt.reset()
         guitxt.text("Hello %s"%num)
-        guitxt.text("Status %s"%status)
-        for j in joints.values():
+        guitxt.text("Status %s"%eye.status)
+        for j in eye.joints.values():
             guitxt.text(j.name)
             guitxt.indent()
             guitxt.text("Position: " + str(j.pos))
