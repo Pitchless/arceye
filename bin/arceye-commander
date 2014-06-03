@@ -265,6 +265,12 @@ def dead_zoned(val, dead_zone=dead_zone):
         return 0
     return val
 
+# If pid is running set target else raw command
+def joint_ui_command(joint,val):
+    if joint.active: # pid is running
+        joint.target += val
+    else:
+        joint.command += val
 
 # Start the eye
 eye = ArcEye(port)
@@ -315,14 +321,16 @@ while not done:
         elif keys[pygame.K_SPACE]:
             for j in eye.all_joints():
                 j.command = 0
+                j.active = False
         elif keys[pygame.K_a]:
-            eye.yaw.command += 1
+            joint_ui_command(eye.yaw, 1)
         elif keys[pygame.K_d]:
-            eye.yaw.command -= 1
+            joint_ui_command(eye.yaw, -1)
         elif keys[pygame.K_w]:
-            eye.pitch.command += 1
+            joint_ui_command(eye.pitch, 1)
         elif keys[pygame.K_s]:
-            eye.pitch.command -= 1
+            joint_ui_command(eye.pitch, -1)
+        # Breaks
         elif keys[pygame.K_r]:
             eye.yaw.brake_cmd = 1
         elif keys[pygame.K_f]:
@@ -335,6 +343,7 @@ while not done:
             eye.lid.brake_cmd = 1
         elif keys[pygame.K_h]:
             eye.lid.brake_cmd = 0
+        # Controllers on/off
         elif keys[pygame.K_1]:
             eye.yaw.toggle_active()
         elif keys[pygame.K_2]:
