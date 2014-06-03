@@ -59,17 +59,9 @@ class ArcEye(object):
         self.yaw   = Joint("yaw")
         self.pitch = Joint("pitch")
         self.lid   = Joint("lid")
-        self._joint_map = {
-            "yaw":   self.yaw,
-            "pitch": self.pitch,
-            "lid":   self.lid,
-        }
 
     def all_joints(self):
         return (self.yaw, self.pitch, self.lid)
-
-    def get_joint(self, jname):
-        return self._joint_map[jname]
 
     def connect(self):
         try:
@@ -90,13 +82,17 @@ class ArcEye(object):
                     continue
                 (name, value) = stat.split("=")
                 jname = "UnknownJoint"
+                joint = None
                 if name == "yaw_pos":
-                    jname = "yaw"
+                    joint = self.yaw
                 elif name == "pitch_pos":
-                    jname = "pitch"
+                    joint = self.pitch
                 elif name == "lid_pos":
-                    jname = "lid"
-                self.get_joint(jname).pos = value
+                    joint = self.lid
+                else:
+                    logerr("Unknown joint in status %s"%name)
+                    continue
+                joint.pos = value
         except Exception as e:
             logerr(e)
 
