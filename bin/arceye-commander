@@ -123,6 +123,8 @@ class Joint(object):
         self.command   = 0
         self.pos       = 0
         self.brake_cmd = 0
+        self.active    = False
+        self.pid       = PID()
 
     def get_pwm(self):
         # Dont try to drive motors while breaking
@@ -142,6 +144,12 @@ class Joint(object):
         if self.brake_cmd:
             return 1
         return 0
+
+    def update(self):
+        if not self.active:
+            return
+        cmd = self.pid.update(self.pos)
+        self.command = cmd
 
 class ArcEye(object):
     """
@@ -200,6 +208,10 @@ class ArcEye(object):
             self.lid.get_pwm(), self.lid.get_direction(), self.lid.get_brake_cmd(),
                 )
         self.ser.write(cmd)
+
+    def update(self):
+        for j in self.all_joints():
+            j.update()
 
 
 # This is a simple pygame class that will help us print to the screen
@@ -260,7 +272,10 @@ frame = 0
 done = False
 while not done:
         frame += 1
-        #pygame.event.pump()
+
+        eye.read_status()
+
+        # Joystick and other events
         for event in pygame.event.get(): # User did something
             if event.type == pygame.QUIT: # If user clicked close
                 done=True # Flag that we are done so we exit this loop
@@ -273,6 +288,7 @@ while not done:
             if event.type == pygame.JOYBUTTONUP:
                 print("Joystick button released.")
 
+        # Keyboard shortcuts
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
                 done = True
@@ -300,8 +316,10 @@ while not done:
         elif keys[pygame.K_h]:
             eye.lid.brake_cmd = 0
 
-        eye.read_status()
+        # Update joints (runs there pids)
+        eye.update()
 
+        # Send new commands.
         if frame % command_rate == 0:
             eye.send_commands()
 
