@@ -24,44 +24,13 @@ def loginfo(*msg):
 def logerr(*msg):
     print("ERROR:", *msg, file=sys.stderr)
 
-# This is a simple class that will help us print to the screen
-class TextPrint:
-    def __init__(self, screen):
-        self.reset()
-        self.screen = screen
-        self.font = pygame.font.Font(None, 20)
-        self.text_color = (0,255,0)
-
-    def text(self, textString):
-        textBitmap = self.font.render(textString, True, self.text_color)
-        self.screen.blit(textBitmap, [self.x, self.y])
-        self.y += self.line_height
-
-    def reset(self):
-        self.x = 10
-        self.y = 10
-        self.line_height = 15
-
-    def indent(self):
-        self.x += 10
-
-    def unindent(self):
-        self.x -= 10
-
-try:
-    ser = Serial(port, 9600)
-except SerialException as e:
-    logerr("Failed to connect to arduino serial. Is it plugged in?\n", e)
-    sys.exit(23)
-sleep(3) # wait for the board to reset
-loginfo("Connected to %s"%port)
 
 class Joint(object):
+    """A single joint on the eye (yaw, pitch, lid), covers sensor and motor."""
     def __init__(self, name):
-        self.name = name
-        self.command = 0
-        self.pos = 0
-        #self.brake_state = None
+        self.name      = name
+        self.command   = 0
+        self.pos       = 0
         self.brake_cmd = 0
 
     def get_pwm(self):
@@ -83,55 +52,109 @@ class Joint(object):
             return 1
         return 0
 
-joints = {
-    "yaw": Joint("yaw"),
-    "pitch": Joint("pitch"),
-    "lid": Joint("lid"),
-}
+class ArcEye(object):
+    """
+    Object representing a complete eye, which it connects to over the serial
+    link to the arduino. Recieves status and sends commands. Manages a set of
+    Joint objects for the yaw, pitch and lid joints.
+    """
+    def __init__(self, port="/dev/ttyUSB0"):
+        self.port   = port
+        self.status = None
+        self.yaw    = Joint("yaw")
+        self.pitch  = Joint("pitch")
+        self.lid    = Joint("lid")
 
-status = None
+    def all_joints(self):
+        return (self.yaw, self.pitch, self.lid)
 
-def read_status():
-    global status
-    global joints
-    try:
-        status = ser.readline()
-        status = status.strip()
-        for stat in status.split(";"):
-            if not stat or stat == "":
-                continue
-            (name, value) = stat.split("=")
-            jname = "UnknownJoint"
-            if name == "yaw_pos":
-                jname = "yaw"
-            elif name == "pitch_pos":
-                jname = "pitch"
-            elif name == "lid_pos":
-                jname = "lid"
-            joints[jname].pos = value
-    except Exception as e:
-        logerr(e)
+    def connect(self):
+        try:
+            self.ser = Serial(port, 9600)
+        except SerialException as e:
+            logerr("Failed to connect to arduino serial. Is it plugged in?\n", e)
+            return False
+        sleep(3) # wait for the board to reset
+        loginfo("Connected to %s"%port)
+        return True
 
-def send_commands():
-    global joints
-    cmd = ""
-    cmd = "%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(
-            joints["yaw"].get_pwm(), joints["yaw"].get_direction(), joints["yaw"].get_brake_cmd(),
-            joints["pitch"].get_pwm(), joints["pitch"].get_direction(), joints["pitch"].get_brake_cmd(),
-            joints["lid"].get_pwm(), joints["lid"].get_direction(), joints["lid"].get_brake_cmd(),
-            )
-    print("CMD:%s"%cmd)
-    ser.write(cmd)
+    def read_status(self):
+        try:
+            self.status = self.ser.readline()
+            self.status = self.status.strip()
+            for stat in self.status.split(";"):
+                if not stat or stat == "":
+                    continue
+                (name, value) = stat.split("=")
+                jname = "UnknownJoint"
+                joint = None
+                if name == "yaw_pos":
+                    joint = self.yaw
+                elif name == "pitch_pos":
+                    joint = self.pitch
+                elif name == "lid_pos":
+                    joint = self.lid
+                else:
+                    logerr("Unknown joint in status %s"%name)
+                    continue
+                joint.pos = value
+        except Exception as e:
+            logerr(e)
 
+    def send_commands(self):
+        cmd = ""
+        cmd = "%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(
+            self.yaw.get_pwm(), self.yaw.get_direction(), self.yaw.get_brake_cmd(),
+            self.pitch.get_pwm(), self.pitch.get_direction(), self.pitch.get_brake_cmd(),
+            self.lid.get_pwm(), self.lid.get_direction(), self.lid.get_brake_cmd(),
+                )
+        self.ser.write(cmd)
+
+
+# This is a simple pygame class that will help us print to the screen
+class TextPrint:
+    def __init__(self, screen, text_color=(0,255,0), font=None):
+        self.reset()
+        self.screen     = screen
+        self.font       = pygame.font.Font(None, 20) if not font else font
+        self.text_color = text_color
+
+    def text(self, textString):
+        textBitmap = self.font.render(textString, True, self.text_color)
+        self.screen.blit(textBitmap, [self.x, self.y])
+        self.y += self.line_height
+
+    def reset(self):
+        self.x = 10
+        self.y = 10
+        self.line_height = 15
+
+    def indent(self):
+        self.x += 10
+
+    def unindent(self):
+        self.x -= 10
+
+
+# Util func to clamp a value in a deadzone
 def dead_zoned(val, dead_zone=dead_zone):
     if val > -dead_zone and val < dead_zone:
         return 0
     return val
 
-pygame.init()
-screen = pygame.display.set_mode( (320,240) )
-pygame.display.set_caption("ArcEye")
 
+# Start the eye
+eye = ArcEye(port)
+eye.connect()
+
+# Start the gui
+pygame.init()
+pygame.display.set_caption("ArcEye")
+screen = pygame.display.set_mode( (320,240) )
+screen.fill((0, 0, 0))
+guitxt = TextPrint(screen)
+
+# Grab the joystick
 joystick = None
 pygame.joystick.init()
 try:
@@ -141,24 +164,19 @@ try:
 except pygame.error as e:
     logerr("Joystick fail %s"%e)
 
-guitxt = TextPrint(screen)
-pygame.display.set_caption('Python numbers')
-screen.fill((159, 182, 205))
-font = pygame.font.Font(None, 17)
-# Used to manage how fast the screen updates
-clock = pygame.time.Clock()
-num = 0
+# Main loop
+frame = 0
 done = False
 while not done:
-        num += 1
+        frame += 1
         #pygame.event.pump()
         for event in pygame.event.get(): # User did something
             if event.type == pygame.QUIT: # If user clicked close
                 done=True # Flag that we are done so we exit this loop
             elif event.type == pygame.JOYAXISMOTION:
-                joints['yaw'].command = dead_zoned(joystick.get_axis(0)) * max_pwm;
-                joints['pitch'].command = dead_zoned(joystick.get_axis(1)) * max_pwm;
-                joints['lid'].command = dead_zoned(joystick.get_axis(2)) * max_pwm;
+                eye.yaw.command = dead_zoned(joystick.get_axis(0)) * max_pwm;
+                eye.pitch.command = dead_zoned(joystick.get_axis(1)) * max_pwm;
+                eye.lid.command = dead_zoned(joystick.get_axis(2)) * max_pwm;
             if event.type == pygame.JOYBUTTONDOWN:
                 print("Joystick button pressed.")
             if event.type == pygame.JOYBUTTONUP:
@@ -168,39 +186,40 @@ while not done:
         if keys[pygame.K_ESCAPE]:
                 done = True
         elif keys[pygame.K_SPACE]:
-            for j in joints.values():
+            for j in eye.all_joints():
                 j.command = 0
         elif keys[pygame.K_a]:
-            joints['yaw'].command += 1
+            eye.yaw.command += 1
         elif keys[pygame.K_d]:
-            joints['yaw'].command -= 1
+            eye.yaw.command -= 1
         elif keys[pygame.K_w]:
-            joints['pitch'].command += 1
+            eye.pitch.command += 1
         elif keys[pygame.K_s]:
-            joints['pitch'].command -= 1
+            eye.pitch.command -= 1
         elif keys[pygame.K_r]:
-            joints['yaw'].brake_cmd = 1
+            eye.yaw.brake_cmd = 1
         elif keys[pygame.K_f]:
-            joints['yaw'].brake_cmd = 0
+            eye.yaw.brake_cmd = 0
         elif keys[pygame.K_t]:
-            joints['pitch'].brake_cmd = 1
+            eye.pitch.brake_cmd = 1
         elif keys[pygame.K_g]:
-            joints['pitch'].brake_cmd = 0
+            eye.pitch.brake_cmd = 0
         elif keys[pygame.K_y]:
-            joints['lid'].brake_cmd = 1
+            eye.lid.brake_cmd = 1
         elif keys[pygame.K_h]:
-            joints['lid'].brake_cmd = 0
+            eye.lid.brake_cmd = 0
 
-        read_status()
+        eye.read_status()
 
-        if num % command_rate == 0:
-            send_commands()
+        if frame % command_rate == 0:
+            eye.send_commands()
 
         screen.fill((0,0,0))
         guitxt.reset()
-        guitxt.text("Hello %s"%num)
-        guitxt.text("Status %s"%status)
-        for j in joints.values():
+        guitxt.text("Frame: %s"%frame)
+        #guitxt.text("Status %s"%eye.status)
+        guitxt.text("")
+        for j in eye.all_joints():
             guitxt.text(j.name)
             guitxt.indent()
             guitxt.text("Position: " + str(j.pos))
@@ -210,5 +229,3 @@ while not done:
 
         # Go ahead and update the screen with what we've drawn.
         pygame.display.flip()
-        # Limit to 20 frames per second
-        #clock.tick(20)
