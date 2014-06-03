@@ -330,7 +330,7 @@ while not done:
             joint_ui_command(eye.pitch, 1)
         elif keys[pygame.K_s]:
             joint_ui_command(eye.pitch, -1)
-        # Breaks
+        # Brakes
         elif keys[pygame.K_r]:
             eye.yaw.brake_cmd = 1
         elif keys[pygame.K_f]:
