@@ -24,29 +24,6 @@ def loginfo(*msg):
 def logerr(*msg):
     print("ERROR:", *msg, file=sys.stderr)
 
-# This is a simple class that will help us print to the screen
-class TextPrint:
-    def __init__(self, screen):
-        self.reset()
-        self.screen = screen
-        self.font = pygame.font.Font(None, 20)
-        self.text_color = (0,255,0)
-
-    def text(self, textString):
-        textBitmap = self.font.render(textString, True, self.text_color)
-        self.screen.blit(textBitmap, [self.x, self.y])
-        self.y += self.line_height
-
-    def reset(self):
-        self.x = 10
-        self.y = 10
-        self.line_height = 15
-
-    def indent(self):
-        self.x += 10
-
-    def unindent(self):
-        self.x -= 10
 
 class Joint(object):
     def __init__(self, name):
@@ -121,8 +98,32 @@ class ArcEye(object):
             self.joints["pitch"].get_pwm(), self.joints["pitch"].get_direction(), self.joints["pitch"].get_brake_cmd(),
             self.joints["lid"].get_pwm(), self.joints["lid"].get_direction(), self.joints["lid"].get_brake_cmd(),
                 )
-        print("CMD:%s"%cmd)
         self.ser.write(cmd)
+
+
+# This is a simple class that will help us print to the screen
+class TextPrint:
+    def __init__(self, screen):
+        self.reset()
+        self.screen = screen
+        self.font = pygame.font.Font(None, 20)
+        self.text_color = (0,255,0)
+
+    def text(self, textString):
+        textBitmap = self.font.render(textString, True, self.text_color)
+        self.screen.blit(textBitmap, [self.x, self.y])
+        self.y += self.line_height
+
+    def reset(self):
+        self.x = 10
+        self.y = 10
+        self.line_height = 15
+
+    def indent(self):
+        self.x += 10
+
+    def unindent(self):
+        self.x -= 10
 
 def dead_zoned(val, dead_zone=dead_zone):
     if val > -dead_zone and val < dead_zone:
