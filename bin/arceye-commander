@@ -56,11 +56,20 @@ class ArcEye(object):
     def __init__(self, port="/dev/ttyUSB0"):
         self.port = port
         self.status = None
-        self.joints = {
-            "yaw": Joint("yaw"),
-            "pitch": Joint("pitch"),
-            "lid": Joint("lid"),
+        self.yaw   = Joint("yaw")
+        self.pitch = Joint("pitch")
+        self.lid   = Joint("lid")
+        self._joint_map = {
+            "yaw":   self.yaw,
+            "pitch": self.pitch,
+            "lid":   self.lid,
         }
+
+    def all_joints(self):
+        return (self.yaw, self.pitch, self.lid)
+
+    def get_joint(self, jname):
+        return self._joint_map[jname]
 
     def connect(self):
         try:
@@ -87,16 +96,16 @@ class ArcEye(object):
                     jname = "pitch"
                 elif name == "lid_pos":
                     jname = "lid"
-                self.joints[jname].pos = value
+                self.get_joint(jname).pos = value
         except Exception as e:
             logerr(e)
 
     def send_commands(self):
         cmd = ""
         cmd = "%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(
-            self.joints["yaw"].get_pwm(), self.joints["yaw"].get_direction(), self.joints["yaw"].get_brake_cmd(),
-            self.joints["pitch"].get_pwm(), self.joints["pitch"].get_direction(), self.joints["pitch"].get_brake_cmd(),
-            self.joints["lid"].get_pwm(), self.joints["lid"].get_direction(), self.joints["lid"].get_brake_cmd(),
+            self.yaw.get_pwm(), self.yaw.get_direction(), self.yaw.get_brake_cmd(),
+            self.pitch.get_pwm(), self.pitch.get_direction(), self.pitch.get_brake_cmd(),
+            self.lid.get_pwm(), self.lid.get_direction(), self.lid.get_brake_cmd(),
                 )
         self.ser.write(cmd)
 
@@ -162,9 +171,9 @@ while not done:
             if event.type == pygame.QUIT: # If user clicked close
                 done=True # Flag that we are done so we exit this loop
             elif event.type == pygame.JOYAXISMOTION:
-                eye.joints['yaw'].command = dead_zoned(joystick.get_axis(0)) * max_pwm;
-                eye.joints['pitch'].command = dead_zoned(joystick.get_axis(1)) * max_pwm;
-                eye.joints['lid'].command = dead_zoned(joystick.get_axis(2)) * max_pwm;
+                eye.yaw.command = dead_zoned(joystick.get_axis(0)) * max_pwm;
+                eye.pitch.command = dead_zoned(joystick.get_axis(1)) * max_pwm;
+                eye.lid.command = dead_zoned(joystick.get_axis(2)) * max_pwm;
             if event.type == pygame.JOYBUTTONDOWN:
                 print("Joystick button pressed.")
             if event.type == pygame.JOYBUTTONUP:
@@ -174,28 +183,28 @@ while not done:
         if keys[pygame.K_ESCAPE]:
                 done = True
         elif keys[pygame.K_SPACE]:
-            for j in eye.joints.values():
+            for j in eye.all_joints():
                 j.command = 0
         elif keys[pygame.K_a]:
-            eye.joints['yaw'].command += 1
+            eye.yaw.command += 1
         elif keys[pygame.K_d]:
-            eye.joints['yaw'].command -= 1
+            eye.yaw.command -= 1
         elif keys[pygame.K_w]:
-            eye.joints['pitch'].command += 1
+            eye.pitch.command += 1
         elif keys[pygame.K_s]:
-            eye.joints['pitch'].command -= 1
+            eye.pitch.command -= 1
         elif keys[pygame.K_r]:
-            eye.joints['yaw'].brake_cmd = 1
+            eye.yaw.brake_cmd = 1
         elif keys[pygame.K_f]:
-            eye.joints['yaw'].brake_cmd = 0
+            eye.yaw.brake_cmd = 0
         elif keys[pygame.K_t]:
-            eye.joints['pitch'].brake_cmd = 1
+            eye.pitch.brake_cmd = 1
         elif keys[pygame.K_g]:
-            eye.joints['pitch'].brake_cmd = 0
+            eye.pitch.brake_cmd = 0
         elif keys[pygame.K_y]:
-            eye.joints['lid'].brake_cmd = 1
+            eye.lid.brake_cmd = 1
         elif keys[pygame.K_h]:
-            eye.joints['lid'].brake_cmd = 0
+            eye.lid.brake_cmd = 0
 
         eye.read_status()
 
@@ -206,7 +215,7 @@ while not done:
         guitxt.reset()
         guitxt.text("Hello %s"%num)
         guitxt.text("Status %s"%eye.status)
-        for j in eye.joints.values():
+        for j in eye.all_joints():
             guitxt.text(j.name)
             guitxt.indent()
             guitxt.text("Position: " + str(j.pos))
