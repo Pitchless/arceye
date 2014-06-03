@@ -126,6 +126,26 @@ class Joint(object):
         self.active    = False
         self.pid       = PID()
 
+    @property
+    def target(self):
+        return self.pid.getPoint()
+
+    @target.setter
+    def target(self, value):
+        self.pid.setPoint(value)
+
+    @property
+    def error(self):
+        return self.pid.getError()
+
+    def toggle_active(self):
+        if self.active:
+            self.active = False
+            self.command = 0
+        else:
+            self.active = True
+        return self.active
+
     def get_pwm(self):
         # Dont try to drive motors while breaking
         if self.brake_cmd:
@@ -196,7 +216,7 @@ class ArcEye(object):
                 else:
                     logerr("Unknown joint in status %s"%name)
                     continue
-                joint.pos = value
+                joint.pos = float(value)
         except Exception as e:
             logerr(e)
 
@@ -253,7 +273,7 @@ eye.connect()
 # Start the gui
 pygame.init()
 pygame.display.set_caption("ArcEye")
-screen = pygame.display.set_mode( (320,240) )
+screen = pygame.display.set_mode( (320,400) )
 screen.fill((0, 0, 0))
 guitxt = TextPrint(screen)
 
@@ -315,6 +335,12 @@ while not done:
             eye.lid.brake_cmd = 1
         elif keys[pygame.K_h]:
             eye.lid.brake_cmd = 0
+        elif keys[pygame.K_1]:
+            eye.yaw.toggle_active()
+        elif keys[pygame.K_2]:
+            eye.pitch.toggle_active()
+        elif keys[pygame.K_3]:
+            eye.lid.toggle_active()
 
         # Update joints (runs there pids)
         eye.update()
@@ -334,6 +360,11 @@ while not done:
             guitxt.text("Position: " + str(j.pos))
             guitxt.text("Command: %s"%j.command)
             guitxt.text("Brake: %s"%j.brake_cmd)
+            guitxt.text("Active: %s"%j.active)
+            guitxt.indent()
+            guitxt.text("Target: %s"%j.target)
+            guitxt.text("Error: %s"%j.error)
+            guitxt.unindent()
             guitxt.unindent()
 
         # Go ahead and update the screen with what we've drawn.
