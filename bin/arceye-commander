@@ -259,11 +259,11 @@ class TextPrint:
     def __init__(self, screen, text_color=(0,255,0), font=None):
         self.reset()
         self.screen     = screen
-        self.font       = pygame.font.Font(None, 20) if not font else font
+        self._font      = pygame.font.Font(None, 20) if not font else font
         self.text_color = text_color
 
     def text(self, textString):
-        textBitmap = self.font.render(textString, True, self.text_color)
+        textBitmap = self._font.render(textString, True, self.text_color)
         self.screen.blit(textBitmap, [self.x, self.y])
         self.y += self.line_height
 
@@ -280,6 +280,9 @@ class TextPrint:
 
     def color(self,r,g,b):
         self.text_color = (r,g,b)
+
+    def font(self,name,size=12):
+        self._font = pygame.font.Font(pygame.font.match_font(name), size)
 
 
 # Util func to clamp a value in a deadzone
@@ -311,9 +314,11 @@ eye.connect()
 # Start the gui
 pygame.init()
 pygame.display.set_caption("ArcEye")
-screen = pygame.display.set_mode( (320,460) )
+screen = pygame.display.set_mode( (320,500) )
 screen.fill((0, 0, 0))
 guitxt = TextPrint(screen)
+#loginfo("Fonts: %s"%pygame.font.get_fonts())
+guitxt.font("droidsansmono", 14)
 
 # Grab the joystick
 joystick = None
