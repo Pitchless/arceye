@@ -8,21 +8,28 @@ from time import sleep
 import pygame
 
 # Read config from command line if set
-config = None
+config = {}
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
     config = yaml.load(file(sys.argv[1]))
 
 port = '/dev/ttyUSB0'
+if config.has_key('port'): port = config['port']
 
 dead_zone = 0.1
+if config.has_key('dead_zone'): dead_zone = config['dead_zone']
 # Used to scale the joystick axis
 max_pwm_yaw = 50
 max_pwm_pitch = 50
 max_pwm_lid = 120
+if config.has_key('max_pwm_yaw'): max_pwm_yaw = config['max_pwm_yaw']
+if config.has_key('max_pwm_pitch'): max_pwm_pitch = config['max_pwm_pitch']
+if config.has_key('max_pwm_lid'): max_pwm_lid = config['max_pwm_lid']
 
 # 1 same as status from arduino (glitchy!). 4 = every 4 statuses etc
 command_rate = 4
+if config.has_key('command_rate'): command_rate = config['command_rate']
+
 
 def loginfo(*msg):
     print("INFO:", *msg)

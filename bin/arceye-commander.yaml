@@ -1,4 +1,4 @@
-port: 'dev/ttyUSB0'
+port: /dev/ttyUSB0
 # 1 same as status from arduino (glitchy!). 4 = every 4 statuses etc
 command_rate: 4
 # Joystick deadzone
