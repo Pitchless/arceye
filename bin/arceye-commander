@@ -275,9 +275,9 @@ class ArcEye(object):
             if sub_config.has_key('p'):
                 self.yaw.pid.setKp(sub_config['p'])
             if sub_config.has_key('i'):
-                self.yaw.pid.setKp(sub_config['i'])
+                self.yaw.pid.setKi(sub_config['i'])
             if sub_config.has_key('d'):
-                self.yaw.pid.setKp(sub_config['d'])
+                self.yaw.pid.setKd(sub_config['d'])
         if config.has_key('pitch'):
             sub_config = config['pitch']
             if sub_config.has_key('pwm_limit'):
@@ -291,9 +291,9 @@ class ArcEye(object):
             if sub_config.has_key('p'):
                 self.pitch.pid.setKp(sub_config['p'])
             if sub_config.has_key('i'):
-                self.pitch.pid.setKp(sub_config['i'])
+                self.pitch.pid.setKi(sub_config['i'])
             if sub_config.has_key('d'):
-                self.pitch.pid.setKp(sub_config['d'])
+                self.pitch.pid.setKd(sub_config['d'])
         if config.has_key('lid'):
             sub_config = config['lid']
             if sub_config.has_key('pwm_limit'):
@@ -307,9 +307,9 @@ class ArcEye(object):
             if sub_config.has_key('p'):
                 self.lid.pid.setKp(sub_config['p'])
             if sub_config.has_key('i'):
-                self.lid.pid.setKp(sub_config['i'])
+                self.lid.pid.setKi(sub_config['i'])
             if sub_config.has_key('d'):
-                self.lid.pid.setKp(sub_config['d'])
+                self.lid.pid.setKd(sub_config['d'])
 
 
 # This is a simple pygame class that will help us print to the screen
