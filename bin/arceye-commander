@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-import sys
+import sys, os
 import yaml
 from serial import Serial, SerialException
 from time import sleep
@@ -9,9 +9,11 @@ import pygame
 
 # Read config from command line if set
 config = {}
+config_st_mtime = 0
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
     config = yaml.load(file(sys.argv[1]))
+    config_st_mtime = os.stat(config_file).st_mtime
 
 port = '/dev/ttyUSB0'
 if config.has_key('port'): port = config['port']
@@ -504,4 +506,14 @@ while not done:
 
         # Go ahead and update the screen with what we've drawn.
         pygame.display.flip()
+
+        # Re-read config
+        if frame % 200 == 0: # avoid lots of stat calls
+            if config_file:
+                st_mtime = os.stat(config_file).st_mtime
+                if st_mtime > config_st_mtime:
+                    loginfo("Re-reading config")
+                    config = yaml.load(file(config_file))
+                    config_st_mtime = st_mtime
+                    eye.update_config(config)
 
