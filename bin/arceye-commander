@@ -152,6 +152,7 @@ class Joint(object):
         return self.pid.getError()
 
     def toggle_active(self):
+        """Turn the PID loop control on and off."""
         if self.active:
             self.active = False
             self.command = 0
@@ -379,13 +380,14 @@ while not done:
         elif keys[pygame.K_3]:
             eye.lid.toggle_active()
 
-        # Update joints (runs there pids)
+        # Update the eye and it's joints (runs their pids)
         eye.update()
 
         # Send new commands.
         if frame % command_rate == 0:
             eye.send_commands()
 
+        # Update the display
         screen.fill((0,0,0))
         guitxt.reset()
         guitxt.text("Frame: %s"%frame)
