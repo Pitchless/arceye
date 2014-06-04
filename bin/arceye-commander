@@ -121,21 +121,23 @@ class PID:
 class Joint(object):
     """A single joint on the eye (yaw, pitch, lid), covers sensor and motor."""
     def __init__(self, name):
-        self.name       = name
-        self.command    = 0
+        self.name      = name
+        self.command   = 0
         self.pwm_limit = 255
-        self.pos        = 0
-        self.pos_raw    = 0
-        self.pos_center = 0
-        self.pos_min    = -100
-        self.pos_max    = 100
-        self.brake_cmd  = 0
-        self.active     = False
-        self.pid        = PID()
+        self.pos       = 0
+        self.pos_raw   = 0
+        # Basically the calibration.
+        # @TODO - Shortcut to set this from the current value.
+        self.pos_center_raw = 0
+        self.pos_min   = -100
+        self.pos_max   = 100
+        self.brake_cmd = 0
+        self.active    = False
+        self.pid       = PID()
 
     def set_pos_raw(self, v):
         self.pos_raw = v
-        self.pos = v - self.pos_center
+        self.pos = v - self.pos_center_raw
 
     @property
     def target(self):
@@ -292,12 +294,12 @@ def joint_ui_command(joint,val):
 # Start the eye
 eye = ArcEye(port)
 eye.yaw.pwm_limit = 50
-eye.yaw.pos_center = 353 # raw
+eye.yaw.pos_center_raw = 353
 eye.yaw.pos_max = 120 # scaled
 eye.yaw.pos_min = -100 # scaled
 eye.yaw.pid.setKp(0.2)
 eye.pitch.pwm_limit = 70
-eye.pitch.pos_center = 484
+eye.pitch.pos_center_raw = 484
 eye.pitch.pos_max = 400
 eye.pitch.pos_min = -200
 eye.connect()
