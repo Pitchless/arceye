@@ -199,6 +199,7 @@ class ArcEye(object):
     def __init__(self, port="/dev/ttyUSB0"):
         self.port   = port
         self.status = None
+        self.last_cmd = ""
         self.yaw    = Joint("yaw")
         self.pitch  = Joint("pitch")
         self.lid    = Joint("lid")
@@ -218,25 +219,15 @@ class ArcEye(object):
 
     def read_status(self):
         try:
-            self.status = self.ser.readline()
-            self.status = self.status.strip()
-            for stat in self.status.split(";"):
-                if not stat or stat == "":
-                    continue
-                (name, value) = stat.split("=")
-                jname = "UnknownJoint"
-                joint = None
-                if name == "yaw_pos":
-                    joint = self.yaw
-                elif name == "pitch_pos":
-                    joint = self.pitch
-                elif name == "lid_pos":
-                    joint = self.lid
-                else:
-                    logerr("Unknown joint in status %s"%name)
-                    continue
-                #joint.pos = float(value)
-                joint.set_pos_raw(float(value))
+            status = self.ser.readline()
+            status = status.strip()
+            values = status.split(',')
+            if not len(values) == 3:
+                raise Exception("Got wrong number (%s not 3) of values in status (%s), ignoring."%(len(values),status))
+            self.status = status
+            self.yaw.set_pos_raw(float(values[0]))
+            self.pitch.set_pos_raw(float(values[1]))
+            self.lid.set_pos_raw(float(values[2]))
         except Exception as e:
             logerr(e)
 
@@ -248,6 +239,7 @@ class ArcEye(object):
             self.lid.get_pwm(), self.lid.get_direction(), self.lid.get_brake_cmd(),
                 )
         self.ser.write(cmd)
+        self.last_cmd = cmd
 
     def update(self):
         for j in self.all_joints():
@@ -390,8 +382,9 @@ while not done:
         # Update the display
         screen.fill((0,0,0))
         guitxt.reset()
-        guitxt.text("Frame: %s"%frame)
-        #guitxt.text("Status %s"%eye.status)
+        guitxt.text("Frame:   %s"%frame)
+        guitxt.text("Status:  %s"%eye.status)
+        guitxt.text("Command: %s"%eye.last_cmd)
         guitxt.text("")
         for j in eye.all_joints():
             guitxt.text(j.name)
