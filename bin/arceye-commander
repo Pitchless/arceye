@@ -325,6 +325,7 @@ except pygame.error as e:
 # Main loop
 frame = 0
 done = False
+show_help = False
 while not done:
         frame += 1
 
@@ -351,6 +352,8 @@ while not done:
             for j in eye.all_joints():
                 j.command = 0
                 j.active = False
+        elif keys[pygame.K_F1]:
+            show_help = False if show_help else True
         elif keys[pygame.K_a]:
             joint_ui_command(eye.yaw, 1)
         elif keys[pygame.K_d]:
@@ -388,26 +391,50 @@ while not done:
             eye.send_commands()
 
         # Update the display
-        screen.fill((0,0,0))
-        guitxt.reset()
-        guitxt.text("Frame: %s"%frame)
-        #guitxt.text("Status %s"%eye.status)
-        guitxt.text("")
-        for j in eye.all_joints():
-            guitxt.text(j.name)
-            guitxt.indent()
-            guitxt.text("Pos raw: " + str(j.pos_raw))
-            guitxt.text("Position: " + str(j.pos))
-            guitxt.text("Command: %s"%j.command)
-            guitxt.text("PWM: %s Dir:%s"%(j.get_pwm(),j.get_direction()))
-            guitxt.text("Brake: %s"%j.brake_cmd)
-            guitxt.text("Active: %s"%j.active)
-            guitxt.indent()
-            guitxt.text("Target: %s"%j.target)
-            guitxt.text("Error: %s"%j.error)
-            guitxt.text("P:%s I:%s D:%s"%(j.pid.Kp, j.pid.Ki, j.pid.Kd))
-            guitxt.unindent()
-            guitxt.unindent()
+        if show_help:
+            screen.fill((0,0,0))
+            guitxt.reset()
+            guitxt.text("**** ArcEye ***")
+            guitxt.text("")
+            guitxt.text("ESC - Quit")
+            guitxt.text("F1  - Show/hide this help")
+            guitxt.text("SPACE  - Zero commands and controllers.")
+            guitxt.text("a - yaw left")
+            guitxt.text("d - yaw right")
+            guitxt.text("w - pitch up")
+            guitxt.text("s - pitch down")
+            guitxt.text("1 - toggle yaw controller (PID)")
+            guitxt.text("2 - toggle pitch controller (PID)")
+            guitxt.text("3 - toggle lid controller (PID)")
+            guitxt.text("r,f - yaw brake on,off")
+            guitxt.text("t,g - pitch brake on,off")
+            guitxt.text("w,h - lid brake on,off")
+            guitxt.text("")
+            guitxt.text("Left Stick - yaw")
+            guitxt.text("Right Stick - pitch")
+            guitxt.text("Left Trigger - lid")
+        else:
+            screen.fill((0,0,0))
+            guitxt.reset()
+            guitxt.text("Frame: %s"%frame)
+            #guitxt.text("Status %s"%eye.status)
+            guitxt.text("")
+            for j in eye.all_joints():
+                guitxt.text(j.name)
+                guitxt.indent()
+                guitxt.text("Pos raw: " + str(j.pos_raw))
+                guitxt.text("Position: " + str(j.pos))
+                guitxt.text("Command: %s"%j.command)
+                guitxt.text("PWM: %s Dir:%s"%(j.get_pwm(),j.get_direction()))
+                guitxt.text("Brake: %s"%j.brake_cmd)
+                guitxt.text("Active: %s"%j.active)
+                guitxt.indent()
+                guitxt.text("Target: %s"%j.target)
+                guitxt.text("Error: %s"%j.error)
+                guitxt.text("P:%s I:%s D:%s"%(j.pid.Kp, j.pid.Ki, j.pid.Kd))
+                guitxt.unindent()
+                guitxt.unindent()
 
         # Go ahead and update the screen with what we've drawn.
         pygame.display.flip()
+
