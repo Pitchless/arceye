@@ -278,6 +278,9 @@ class TextPrint:
     def unindent(self):
         self.x -= 10
 
+    def color(self,r,g,b):
+        self.text_color = (r,g,b)
+
 
 # Util func to clamp a value in a deadzone
 def dead_zoned(val, dead_zone=dead_zone):
@@ -394,6 +397,7 @@ while not done:
         if show_help:
             screen.fill((0,0,0))
             guitxt.reset()
+            guitxt.color(255,255,0)
             guitxt.text("**** ArcEye ***")
             guitxt.text("")
             guitxt.text("ESC - Quit")
@@ -416,6 +420,7 @@ while not done:
         else:
             screen.fill((0,0,0))
             guitxt.reset()
+            guitxt.color(0,255,0)
             guitxt.text("Frame: %s"%frame)
             #guitxt.text("Status %s"%eye.status)
             guitxt.text("")
