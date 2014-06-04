@@ -1,24 +1,38 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-import sys
+import sys, os
+import yaml
 from serial import Serial, SerialException
 from time import sleep
 import pygame
 
-port = '/dev/ttyUSB0'
-# Read port from command line if set
+# Read config from command line if set
+config = {}
+config_file = None
+config_st_mtime = 0
 if len(sys.argv) > 1:
-    port = sys.argv[1]
+    config_file = sys.argv[1]
+    config = yaml.load(file(sys.argv[1]))
+    config_st_mtime = os.stat(config_file).st_mtime
+
+port = '/dev/ttyUSB0'
+if config.has_key('port'): port = config['port']
 
 dead_zone = 0.1
+if config.has_key('dead_zone'): dead_zone = config['dead_zone']
 # Used to scale the joystick axis
 max_pwm_yaw = 50
 max_pwm_pitch = 50
 max_pwm_lid = 120
+if config.has_key('max_pwm_yaw'): max_pwm_yaw = config['max_pwm_yaw']
+if config.has_key('max_pwm_pitch'): max_pwm_pitch = config['max_pwm_pitch']
+if config.has_key('max_pwm_lid'): max_pwm_lid = config['max_pwm_lid']
 
 # 1 same as status from arduino (glitchy!). 4 = every 4 statuses etc
 command_rate = 4
+if config.has_key('command_rate'): command_rate = config['command_rate']
+
 
 def loginfo(*msg):
     print("INFO:", *msg)
@@ -245,17 +259,69 @@ class ArcEye(object):
         for j in self.all_joints():
             j.update()
 
+    def update_config(self, config):
+        """Update with the new config, dict of dicts etc, return from yaml parse"""
+        if config is None: return
+        if config.has_key('yaw'):
+            sub_config = config['yaw']
+            if sub_config.has_key('pwm_limit'):
+                self.yaw.pwm_limit = sub_config['pwm_limit']
+            if sub_config.has_key('pos_center_raw'):
+                self.yaw.pos_center_raw = sub_config['pos_center_raw']
+            if sub_config.has_key('pos_max'):
+                self.yaw.pos_max = sub_config['pos_max']
+            if sub_config.has_key('pos_min'):
+                self.yaw.pos_min = sub_config['pos_min']
+            if sub_config.has_key('p'):
+                self.yaw.pid.setKp(sub_config['p'])
+            if sub_config.has_key('i'):
+                self.yaw.pid.setKp(sub_config['i'])
+            if sub_config.has_key('d'):
+                self.yaw.pid.setKp(sub_config['d'])
+        if config.has_key('pitch'):
+            sub_config = config['pitch']
+            if sub_config.has_key('pwm_limit'):
+                self.pitch.pwm_limit = sub_config['pwm_limit']
+            if sub_config.has_key('pos_center_raw'):
+                self.pitch.pos_center_raw = sub_config['pos_center_raw']
+            if sub_config.has_key('pos_max'):
+                self.pitch.pos_max = sub_config['pos_max']
+            if sub_config.has_key('pos_min'):
+                self.pitch.pos_min = sub_config['pos_min']
+            if sub_config.has_key('p'):
+                self.pitch.pid.setKp(sub_config['p'])
+            if sub_config.has_key('i'):
+                self.pitch.pid.setKp(sub_config['i'])
+            if sub_config.has_key('d'):
+                self.pitch.pid.setKp(sub_config['d'])
+        if config.has_key('lid'):
+            sub_config = config['lid']
+            if sub_config.has_key('pwm_limit'):
+                self.lid.pwm_limit = sub_config['pwm_limit']
+            if sub_config.has_key('pos_center_raw'):
+                self.lid.pos_center_raw = sub_config['pos_center_raw']
+            if sub_config.has_key('pos_max'):
+                self.lid.pos_max = sub_config['pos_max']
+            if sub_config.has_key('pos_min'):
+                self.lid.pos_min = sub_config['pos_min']
+            if sub_config.has_key('p'):
+                self.lid.pid.setKp(sub_config['p'])
+            if sub_config.has_key('i'):
+                self.lid.pid.setKp(sub_config['i'])
+            if sub_config.has_key('d'):
+                self.lid.pid.setKp(sub_config['d'])
+
 
 # This is a simple pygame class that will help us print to the screen
 class TextPrint:
     def __init__(self, screen, text_color=(0,255,0), font=None):
         self.reset()
         self.screen     = screen
-        self.font       = pygame.font.Font(None, 20) if not font else font
+        self._font      = pygame.font.Font(None, 20) if not font else font
         self.text_color = text_color
 
     def text(self, textString):
-        textBitmap = self.font.render(textString, True, self.text_color)
+        textBitmap = self._font.render(textString, True, self.text_color)
         self.screen.blit(textBitmap, [self.x, self.y])
         self.y += self.line_height
 
@@ -269,6 +335,12 @@ class TextPrint:
 
     def unindent(self):
         self.x -= 10
+
+    def color(self,r,g,b):
+        self.text_color = (r,g,b)
+
+    def font(self,name,size=12):
+        self._font = pygame.font.Font(pygame.font.match_font(name), size)
 
 
 # Util func to clamp a value in a deadzone
@@ -284,25 +356,21 @@ def joint_ui_command(joint,val):
     else:
         joint.command += val
 
-# Start the eye
+# Setup the eye
 eye = ArcEye(port)
-eye.yaw.pwm_limit = 50
-eye.yaw.pos_center_raw = 353
-eye.yaw.pos_max = 120 # scaled
-eye.yaw.pos_min = -100 # scaled
-eye.yaw.pid.setKp(0.2)
-eye.pitch.pwm_limit = 70
-eye.pitch.pos_center_raw = 484
-eye.pitch.pos_max = 400
-eye.pitch.pos_min = -200
+eye.update_config(config)
+
+# Start the eye
 eye.connect()
 
 # Start the gui
 pygame.init()
 pygame.display.set_caption("ArcEye")
-screen = pygame.display.set_mode( (320,460) )
+screen = pygame.display.set_mode( (320,500) )
 screen.fill((0, 0, 0))
 guitxt = TextPrint(screen)
+#loginfo("Fonts: %s"%pygame.font.get_fonts())
+guitxt.font("droidsansmono", 14)
 
 # Grab the joystick
 joystick = None
@@ -317,6 +385,7 @@ except pygame.error as e:
 # Main loop
 frame = 0
 done = False
+show_help = False
 while not done:
         frame += 1
 
@@ -343,6 +412,8 @@ while not done:
             for j in eye.all_joints():
                 j.command = 0
                 j.active = False
+        elif keys[pygame.K_F1]:
+            show_help = False if show_help else True
         elif keys[pygame.K_a]:
             joint_ui_command(eye.yaw, 1)
         elif keys[pygame.K_d]:
@@ -380,27 +451,62 @@ while not done:
             eye.send_commands()
 
         # Update the display
-        screen.fill((0,0,0))
-        guitxt.reset()
-        guitxt.text("Frame:   %s"%frame)
-        guitxt.text("Status:  %s"%eye.status)
-        guitxt.text("Command: %s"%eye.last_cmd)
-        guitxt.text("")
-        for j in eye.all_joints():
-            guitxt.text(j.name)
-            guitxt.indent()
-            guitxt.text("Pos raw: " + str(j.pos_raw))
-            guitxt.text("Position: " + str(j.pos))
-            guitxt.text("Command: %s"%j.command)
-            guitxt.text("PWM: %s Dir:%s"%(j.get_pwm(),j.get_direction()))
-            guitxt.text("Brake: %s"%j.brake_cmd)
-            guitxt.text("Active: %s"%j.active)
-            guitxt.indent()
-            guitxt.text("Target: %s"%j.target)
-            guitxt.text("Error: %s"%j.error)
-            guitxt.text("P:%s I:%s D:%s"%(j.pid.Kp, j.pid.Ki, j.pid.Kd))
-            guitxt.unindent()
-            guitxt.unindent()
+        if show_help:
+            screen.fill((0,0,0))
+            guitxt.reset()
+            guitxt.color(255,255,0)
+            guitxt.text("**** ArcEye ***")
+            guitxt.text("")
+            guitxt.text("ESC - Quit")
+            guitxt.text("F1  - Show/hide this help")
+            guitxt.text("SPACE  - Zero commands and controllers.")
+            guitxt.text("a - yaw left")
+            guitxt.text("d - yaw right")
+            guitxt.text("w - pitch up")
+            guitxt.text("s - pitch down")
+            guitxt.text("1 - toggle yaw controller (PID)")
+            guitxt.text("2 - toggle pitch controller (PID)")
+            guitxt.text("3 - toggle lid controller (PID)")
+            guitxt.text("r,f - yaw brake on,off")
+            guitxt.text("t,g - pitch brake on,off")
+            guitxt.text("w,h - lid brake on,off")
+            guitxt.text("")
+            guitxt.text("Left Stick - yaw")
+            guitxt.text("Right Stick - pitch")
+            guitxt.text("Left Trigger - lid")
+        else:
+            screen.fill((0,0,0))
+            guitxt.reset()
+            guitxt.color(0,255,0)
+            guitxt.text("Frame: %s"%frame)
+            #guitxt.text("Status %s"%eye.status)
+            guitxt.text("")
+            for j in eye.all_joints():
+                guitxt.text(j.name)
+                guitxt.indent()
+                guitxt.text("Pos raw: " + str(j.pos_raw))
+                guitxt.text("Position: %s (%s..%s)"%(j.pos, j.pos_min, j.pos_max))
+                guitxt.text("Command: %s"%j.command)
+                guitxt.text("PWM: %s Dir:%s"%(j.get_pwm(),j.get_direction()))
+                guitxt.text("Brake: %s"%j.brake_cmd)
+                guitxt.text("Active: %s"%j.active)
+                guitxt.indent()
+                guitxt.text("Target: %s"%j.target)
+                guitxt.text("Error: %s"%j.error)
+                guitxt.text("P:%s I:%s D:%s"%(j.pid.Kp, j.pid.Ki, j.pid.Kd))
+                guitxt.unindent()
+                guitxt.unindent()
 
         # Go ahead and update the screen with what we've drawn.
         pygame.display.flip()
+
+        # Re-read config
+        if frame % 200 == 0: # avoid lots of stat calls
+            if config_file:
+                st_mtime = os.stat(config_file).st_mtime
+                if st_mtime > config_st_mtime:
+                    loginfo("Re-reading config")
+                    config = yaml.load(file(config_file))
+                    config_st_mtime = st_mtime
+                    eye.update_config(config)
+
