@@ -9,6 +9,7 @@ import pygame
 
 # Read config from command line if set
 config = {}
+config_file = None
 config_st_mtime = 0
 if len(sys.argv) > 1:
     config_file = sys.argv[1]
