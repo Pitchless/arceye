@@ -229,9 +229,9 @@ void do_command() {
 
 void send_status() {
   statusString = "";
-  statusString += "yaw_pos=" + String(stat.yaw_pos) + ";";
-  statusString += "pitch_pos=" + String(stat.pitch_pos) + ";";
-  statusString += "lid_pos=" + String(stat.lid_pos);
+  statusString += String(stat.yaw_pos);
+  statusString += "," + String(stat.pitch_pos);
+  statusString += "," + String(stat.lid_pos);
   Serial.println(statusString);
 }
 

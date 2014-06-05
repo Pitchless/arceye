@@ -1,0 +1,14 @@
+* Limit command to limits
+* Tune pids
+* Joystick
+* Test other elec stack
+* Start controllers at current pos for target
+* Pull out arceye lib
+* Robustify
+* Simple demos
+** yaw only
+** pitch only
+** yaw and pitch
+** etc
+* Simple velocity control in the arduino
+* Drink beer!

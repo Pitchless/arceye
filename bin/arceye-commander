@@ -1,24 +1,38 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-import sys
+import sys, os
+import yaml
 from serial import Serial, SerialException
 from time import sleep
 import pygame
 
-port = '/dev/ttyUSB0'
-# Read port from command line if set
+# Read config from command line if set
+config = {}
+config_file = None
+config_st_mtime = 0
 if len(sys.argv) > 1:
-    port = sys.argv[1]
+    config_file = sys.argv[1]
+    config = yaml.load(file(sys.argv[1]))
+    config_st_mtime = os.stat(config_file).st_mtime
+
+port = '/dev/ttyUSB0'
+if config.has_key('port'): port = config['port']
 
 dead_zone = 0.1
+if config.has_key('dead_zone'): dead_zone = config['dead_zone']
 # Used to scale the joystick axis
 max_pwm_yaw = 50
 max_pwm_pitch = 50
 max_pwm_lid = 120
+if config.has_key('max_pwm_yaw'): max_pwm_yaw = config['max_pwm_yaw']
+if config.has_key('max_pwm_pitch'): max_pwm_pitch = config['max_pwm_pitch']
+if config.has_key('max_pwm_lid'): max_pwm_lid = config['max_pwm_lid']
 
 # 1 same as status from arduino (glitchy!). 4 = every 4 statuses etc
 command_rate = 4
+if config.has_key('command_rate'): command_rate = config['command_rate']
+
 
 def loginfo(*msg):
     print("INFO:", *msg)
@@ -199,6 +213,7 @@ class ArcEye(object):
     def __init__(self, port="/dev/ttyUSB0"):
         self.port   = port
         self.status = None
+        self.last_cmd = ""
         self.yaw    = Joint("yaw")
         self.pitch  = Joint("pitch")
         self.lid    = Joint("lid")
@@ -218,25 +233,15 @@ class ArcEye(object):
 
     def read_status(self):
         try:
-            self.status = self.ser.readline()
-            self.status = self.status.strip()
-            for stat in self.status.split(";"):
-                if not stat or stat == "":
-                    continue
-                (name, value) = stat.split("=")
-                jname = "UnknownJoint"
-                joint = None
-                if name == "yaw_pos":
-                    joint = self.yaw
-                elif name == "pitch_pos":
-                    joint = self.pitch
-                elif name == "lid_pos":
-                    joint = self.lid
-                else:
-                    logerr("Unknown joint in status %s"%name)
-                    continue
-                #joint.pos = float(value)
-                joint.set_pos_raw(float(value))
+            status = self.ser.readline()
+            status = status.strip()
+            values = status.split(',')
+            if not len(values) == 3:
+                raise Exception("Got wrong number (%s not 3) of values in status (%s), ignoring."%(len(values),status))
+            self.status = status
+            self.yaw.set_pos_raw(float(values[0]))
+            self.pitch.set_pos_raw(float(values[1]))
+            self.lid.set_pos_raw(float(values[2]))
         except Exception as e:
             logerr(e)
 
@@ -248,10 +253,63 @@ class ArcEye(object):
             self.lid.get_pwm(), self.lid.get_direction(), self.lid.get_brake_cmd(),
                 )
         self.ser.write(cmd)
+        self.last_cmd = cmd
 
     def update(self):
         for j in self.all_joints():
             j.update()
+
+    def update_config(self, config):
+        """Update with the new config, dict of dicts etc, return from yaml parse"""
+        if config is None: return
+        if config.has_key('yaw'):
+            sub_config = config['yaw']
+            if sub_config.has_key('pwm_limit'):
+                self.yaw.pwm_limit = sub_config['pwm_limit']
+            if sub_config.has_key('pos_center_raw'):
+                self.yaw.pos_center_raw = sub_config['pos_center_raw']
+            if sub_config.has_key('pos_max'):
+                self.yaw.pos_max = sub_config['pos_max']
+            if sub_config.has_key('pos_min'):
+                self.yaw.pos_min = sub_config['pos_min']
+            if sub_config.has_key('p'):
+                self.yaw.pid.setKp(sub_config['p'])
+            if sub_config.has_key('i'):
+                self.yaw.pid.setKi(sub_config['i'])
+            if sub_config.has_key('d'):
+                self.yaw.pid.setKd(sub_config['d'])
+        if config.has_key('pitch'):
+            sub_config = config['pitch']
+            if sub_config.has_key('pwm_limit'):
+                self.pitch.pwm_limit = sub_config['pwm_limit']
+            if sub_config.has_key('pos_center_raw'):
+                self.pitch.pos_center_raw = sub_config['pos_center_raw']
+            if sub_config.has_key('pos_max'):
+                self.pitch.pos_max = sub_config['pos_max']
+            if sub_config.has_key('pos_min'):
+                self.pitch.pos_min = sub_config['pos_min']
+            if sub_config.has_key('p'):
+                self.pitch.pid.setKp(sub_config['p'])
+            if sub_config.has_key('i'):
+                self.pitch.pid.setKi(sub_config['i'])
+            if sub_config.has_key('d'):
+                self.pitch.pid.setKd(sub_config['d'])
+        if config.has_key('lid'):
+            sub_config = config['lid']
+            if sub_config.has_key('pwm_limit'):
+                self.lid.pwm_limit = sub_config['pwm_limit']
+            if sub_config.has_key('pos_center_raw'):
+                self.lid.pos_center_raw = sub_config['pos_center_raw']
+            if sub_config.has_key('pos_max'):
+                self.lid.pos_max = sub_config['pos_max']
+            if sub_config.has_key('pos_min'):
+                self.lid.pos_min = sub_config['pos_min']
+            if sub_config.has_key('p'):
+                self.lid.pid.setKp(sub_config['p'])
+            if sub_config.has_key('i'):
+                self.lid.pid.setKi(sub_config['i'])
+            if sub_config.has_key('d'):
+                self.lid.pid.setKd(sub_config['d'])
 
 
 # This is a simple pygame class that will help us print to the screen
@@ -298,17 +356,11 @@ def joint_ui_command(joint,val):
     else:
         joint.command += val
 
-# Start the eye
+# Setup the eye
 eye = ArcEye(port)
-eye.yaw.pwm_limit = 50
-eye.yaw.pos_center_raw = 353
-eye.yaw.pos_max = 120 # scaled
-eye.yaw.pos_min = -100 # scaled
-eye.yaw.pid.setKp(0.2)
-eye.pitch.pwm_limit = 70
-eye.pitch.pos_center_raw = 484
-eye.pitch.pos_max = 400
-eye.pitch.pos_min = -200
+eye.update_config(config)
+
+# Start the eye
 eye.connect()
 
 # Start the gui
@@ -433,7 +485,7 @@ while not done:
                 guitxt.text(j.name)
                 guitxt.indent()
                 guitxt.text("Pos raw: " + str(j.pos_raw))
-                guitxt.text("Position: " + str(j.pos))
+                guitxt.text("Position: %s (%s..%s)"%(j.pos, j.pos_min, j.pos_max))
                 guitxt.text("Command: %s"%j.command)
                 guitxt.text("PWM: %s Dir:%s"%(j.get_pwm(),j.get_direction()))
                 guitxt.text("Brake: %s"%j.brake_cmd)
@@ -447,4 +499,14 @@ while not done:
 
         # Go ahead and update the screen with what we've drawn.
         pygame.display.flip()
+
+        # Re-read config
+        if frame % 200 == 0: # avoid lots of stat calls
+            if config_file:
+                st_mtime = os.stat(config_file).st_mtime
+                if st_mtime > config_st_mtime:
+                    loginfo("Re-reading config")
+                    config = yaml.load(file(config_file))
+                    config_st_mtime = st_mtime
+                    eye.update_config(config)
 
