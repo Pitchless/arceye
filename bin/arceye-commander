@@ -480,16 +480,27 @@ while not done:
         else:
             screen.fill((0,0,0))
             guitxt.reset()
-            guitxt.color(0,255,0)
+            guitxt.color(255,255,0)
             guitxt.text("Frame: %s"%frame)
+            if eye.bat_volt < 18: # over
+                guitxt.color(255,0,0)
+            if eye.bat_volt < 14: # normal
+                guitxt.color(0,255,0)
+            if eye.bat_volt < 11: # under
+                guitxt.color(255,123,0)
             guitxt.text("Battery Volt: %s"%eye.bat_volt)
             #guitxt.text("Status %s"%eye.status)
             guitxt.text("")
             for j in eye.all_joints():
+                guitxt.color(255,255,0)
                 guitxt.text(j.name)
+                guitxt.color(0,255,0)
                 guitxt.indent()
+                if j.pos > j.pos_max or j.pos < j.pos_min:
+                    guitxt.color(255,0,0)
                 guitxt.text("Pos raw: " + str(j.pos_raw))
                 guitxt.text("Position: %s (%s..%s)"%(j.pos, j.pos_min, j.pos_max))
+                guitxt.color(0,255,0)
                 guitxt.text("Command: %s"%j.command)
                 guitxt.text("PWM: %s Dir:%s"%(j.get_pwm(),j.get_direction()))
                 guitxt.text("Brake: %s"%j.brake_cmd)
