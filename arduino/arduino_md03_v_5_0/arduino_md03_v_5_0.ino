@@ -2,9 +2,10 @@
                 ArcEyes USB Serial
 ****************************************************/
 
-const int debug = 0;
+//#define DEBUG 1
+#define DEBUG
 
-if (debug == 1){
+#ifdef DEBUG
    #include <Wire.h>
    #include <LCD.h>
    #include <LiquidCrystal_I2C.h>
@@ -20,7 +21,7 @@ if (debug == 1){
     #define D6_pin  6
     #define D7_pin  7
     LiquidCrystal_I2C lcd(I2C_ADDR,En_pin,Rw_pin,Rs_pin,D4_pin,D5_pin,D6_pin,D7_pin);
-}
+#endif
 
 
 const int potPin1 = A0;
@@ -85,21 +86,21 @@ boolean stringComplete = false;  // whether the string is complete
 String statusString = "";        // a string to hold the output
 
 void setup(){
-  if (debug == 1){
-     Wire.begin(); //start I2C bus
-     delay(100); //wait for bus to stabalise
-     lcd.begin (16,2); // 2 rows x 16 char
-     // Switch on the backlight
-     lcd.setBacklightPin(BACKLIGHT_PIN,POSITIVE);
-     lcd.setBacklight(HIGH);
-     lcd.clear();
-     lcd.setCursor(0,0);
-     lcd.print("ArcEyes MD03 I2C");
-     lcd.setCursor(0,1);
-     lcd.print("SandBox");
-     delay(30);
-     //lcd.clear();
-  }
+#ifdef DEBUG
+ Wire.begin(); //start I2C bus
+ delay(100); //wait for bus to stabalise
+ lcd.begin (16,2); // 2 rows x 16 char
+ // Switch on the backlight
+ lcd.setBacklightPin(BACKLIGHT_PIN,POSITIVE);
+ lcd.setBacklight(HIGH);
+ lcd.clear();
+ lcd.setCursor(0,0);
+ lcd.print("ArcEyes MD03 I2C");
+ lcd.setCursor(0,1);
+ lcd.print("SandBox");
+ delay(30);
+#endif
+
   pinMode(rlyPin1,OUTPUT); // Setup pins
   pinMode(rlyPin2,OUTPUT); // Setup pins
   pinMode(rlyPin3,OUTPUT); // Setup pins
@@ -121,7 +122,9 @@ void loop(){
   // read commands when we get a full line
   if (stringComplete) {
     read_command();
+#ifdef DEBUG
     lcd_command();
+#endif
     do_command();
   }
 
@@ -197,18 +200,17 @@ void read_command() {
    while(delimPosition >=0);
 }
 
+#ifdef DEBUG
 // Debug: Show current commands on lcd
 void lcd_command() {
-  if (debug == 1){
-     lcd.clear();
-     lcd.setCursor(0,0);
-     lcd.print(
-             "Y"+String(cmd.yaw_pwm)+" "+String(cmd.yaw_direction)
-             +" L"+String(cmd.lid_pwm)+" "+String(cmd.lid_direction)
-             );
-        }
+   lcd.clear();
+   lcd.setCursor(0,0);
+   lcd.print(
+           "Y"+String(cmd.yaw_pwm)+" "+String(cmd.yaw_direction)
+           +" L"+String(cmd.lid_pwm)+" "+String(cmd.lid_direction)
+           );
 } 
-
+#endif
 
 // Send command to the motors
 void do_command() {
@@ -244,11 +246,12 @@ void serialEvent() {
   while (Serial.available()) {
     // get the new byte:
     char inChar = (char)Serial.read();
-    if (debug == 1){
-       lcd.clear();
-       lcd.setCursor(0,0);
-       lcd.print(inChar);
-    }
+#ifdef DEBUG
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print(inChar);
+#endif
+
     // add it to the inputString:
     inputString += inChar;
     // if the incoming character is a newline, set a flag
@@ -257,9 +260,10 @@ void serialEvent() {
       stringComplete = true;
     } 
   }
-  if (debug == 1){
-     lcd.clear();
-     lcd.setCursor(0,0);
-     lcd.print(inputString);
-  }
+
+#ifdef DEBUG
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print(inputString);
+#endif
 }
