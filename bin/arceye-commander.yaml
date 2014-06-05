@@ -1,6 +1,6 @@
 port: /dev/ttyUSB0
 # 1 same as status from arduino (glitchy!). 4 = every 4 statuses etc
-command_rate: 4
+command_rate: 8
 
 # Joystick deadzone
 dead_zone: 0.1
@@ -11,16 +11,20 @@ max_pwm_lid: 120
 # The joints
 yaw:
     pwm_limit: 50
-    pos_center_raw: 338
-    pos_max: 120 # scaled
-    pos_min: -100 # scaled
+    pos_center_raw: 900
+    pos_max: 63 # scaled
+    pos_min: -55 # scaled
     p: 0.2
+    i: 0
+    d: 1.0
 pitch:
-    pwm_limit: 35
-    pos_center_raw: 475
-    pos_max: 350
-    pos_min: -211
-    p: 0.1
+    pwm_limit: 100
+    pos_center_raw: 450
+    pos_max: 500
+    pos_min: -200
+    p: 0.6
+    i: 0.0
+    d: 0.0
 lid:
     pwm_limit: 35
     pos_center_raw: 484
