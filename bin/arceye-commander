@@ -369,7 +369,7 @@ eye.connect()
 # Start the gui
 pygame.init()
 pygame.display.set_caption("ArcEye")
-screen = pygame.display.set_mode( (320,500) )
+screen = pygame.display.set_mode( (320,512) )
 screen.fill((0, 0, 0))
 guitxt = TextPrint(screen)
 #loginfo("Fonts: %s"%pygame.font.get_fonts())
