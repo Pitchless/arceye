@@ -35,6 +35,7 @@ const int motorPinSpeed3 = 11;
 const int motorPinDir1 = 2;
 const int motorPinDir2 = 4;
 const int motorPinDir3 = 5;
+const int battVoltPin = A3;
 boolean direct1 = LOW; // Stores what direction the motor should run in
 boolean direct2 = LOW; // Stores what direction the motor should run in
 boolean direct3 = LOW; // Stores what direction the motor should run in
