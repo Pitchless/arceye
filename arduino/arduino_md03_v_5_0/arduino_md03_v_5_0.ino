@@ -2,25 +2,27 @@
                 ArcEyes USB Serial
 ****************************************************/
 
-/*
-#include <Wire.h>
-#include <LCD.h>
-#include <LiquidCrystal_I2C.h>
-
- //int LCD pins on I2C bus
- #define I2C_ADDR 0x27
- #define BACKLIGHT_PIN 3
- #define En_pin  2
- #define Rw_pin  1
- #define Rs_pin  0
- #define D4_pin  4
- #define D5_pin  5
- #define D6_pin  6
- #define D7_pin  7
- LiquidCrystal_I2C lcd(I2C_ADDR,En_pin,Rw_pin,Rs_pin,D4_pin,D5_pin,D6_pin,D7_pin);
-*/
-
 const int debug = 0;
+
+if (debug == 1){
+   #include <Wire.h>
+   #include <LCD.h>
+   #include <LiquidCrystal_I2C.h>
+
+    //int LCD pins on I2C bus
+    #define I2C_ADDR 0x27
+    #define BACKLIGHT_PIN 3
+    #define En_pin  2
+    #define Rw_pin  1
+    #define Rs_pin  0
+    #define D4_pin  4
+    #define D5_pin  5
+    #define D6_pin  6
+    #define D7_pin  7
+    LiquidCrystal_I2C lcd(I2C_ADDR,En_pin,Rw_pin,Rs_pin,D4_pin,D5_pin,D6_pin,D7_pin);
+}
+
+
 const int potPin1 = A0;
 const int potPin2 = A1;
 const int potPin3 = A2;
