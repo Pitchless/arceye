@@ -79,9 +79,7 @@ def joint_ui_command(joint,val):
 
 # Setup the eye
 eye = ArcEye(port)
-eye.update_config(config)
-
-# Start the eye
+eye.load_config(config_file)
 eye.connect()
 
 # Start the gui
@@ -232,14 +230,4 @@ while not done:
 
         # Go ahead and update the screen with what we've drawn.
         pygame.display.flip()
-
-        # Re-read config
-        if frame % 200 == 0: # avoid lots of stat calls
-            if config_file:
-                st_mtime = os.stat(config_file).st_mtime
-                if st_mtime > config_st_mtime:
-                    loginfo("Re-reading config")
-                    config = yaml.load(file(config_file))
-                    config_st_mtime = st_mtime
-                    eye.update_config(config)
 
