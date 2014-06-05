@@ -2,6 +2,10 @@
                 ArcEyes USB Serial
 ****************************************************/
 
+//settings:
+const float referenceVolts = 4.94; //set the refrence multiplyer for the volt meter
+unsigned long previousBattCheck = 10000;
+
 //#define DEBUG 1
 #define DEBUG
 
@@ -23,7 +27,7 @@
     LiquidCrystal_I2C lcd(I2C_ADDR,En_pin,Rw_pin,Rs_pin,D4_pin,D5_pin,D6_pin,D7_pin);
 #endif
 
-
+//const
 const int potPin1 = A0;
 const int potPin2 = A1;
 const int potPin3 = A2;
@@ -36,7 +40,10 @@ const int motorPinSpeed3 = 11;
 const int motorPinDir1 = 2;
 const int motorPinDir2 = 4;
 const int motorPinDir3 = 5;
-const int battVoltPin = A3;
+const int batteryPin = A3;
+const int lowBattLED = 13;
+
+//var
 boolean direct1 = LOW; // Stores what direction the motor should run in
 boolean direct2 = LOW; // Stores what direction the motor should run in
 boolean direct3 = LOW; // Stores what direction the motor should run in
@@ -44,7 +51,8 @@ float speedControl1 = 0; //store the current speed
 float speedControl2 = 0; //store the current speed
 float speedControl3 = 0; //store the current speed
 long previousMillis = 0;  // store the time LCD was last updated
-long interval = 50; // time setween lcd updates
+long interval = 50; // time between lcd updates
+int lowBattCon = 0; //
 
 struct Status {
   int yaw_pos;
@@ -117,6 +125,7 @@ void setup(){
 
 void loop(){
   static unsigned long send_time = millis();
+  lowBattCheck(); // check and respond to low battery
   read_status();
   
   // read commands when we get a full line
@@ -266,4 +275,51 @@ void serialEvent() {
   lcd.setCursor(0,0);
   lcd.print(inputString);
 #endif
+}
+
+int battVolt() {
+  int val = analogRead(batteryPin); // read the value from the sensor
+  float volts = (10 * val * referenceVolts/1023.0) + 1.2 ; // calculate the ratio. add on the voltage drop due to the diode.
+  return volts;
+  }
+
+void lowBattCheck(){
+  unsigned long currentMillis = millis();
+  if(currentMillis - previousBattCheck > 10000) {
+    int battReading = battVolt();
+    switch (battReading) {
+      case  18: overBattStatus();                   break;
+      case  17: overBattStatus();                   break;
+      case  16: overBattStatus();                   break;
+      case  15: overBattStatus();                   break;
+      case  14: normBattStatus();                   break;
+      case  13: normBattStatus();                   break;
+      case  12: normBattStatus();                   break;
+      case  11: underBattStatus();                  break;
+      case  10: underBattStatus();                  break;
+      case   9: underBattStatus();                  break;
+      case   8: underBattStatus();                  break;
+      case   7: underBattStatus();                  break;
+      case   6: underBattStatus();                  break;
+      default: break;
+    }
+  }
+}
+
+void overBattStatus() {
+  //
+  digitalWrite(lowBattLED, HIGH);
+  lowBattCon = 1;
+}
+
+void normBattStatus() {
+//
+   digitalWrite(lowBattLED, LOW);
+  lowBattCon = 0;
+}
+
+void underBattStatus() {
+//
+   digitalWrite(lowBattLED, HIGH);
+   lowBattCon = 1;
 }
