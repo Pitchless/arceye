@@ -1,9 +1,8 @@
 /***************************************************
            ArcEyes MD03 I2C sandbox
-             by David Wilman        
-   MD03 over I2C code by By James Henderson 2012       
 ****************************************************/
 
+/*
 #include <Wire.h>
 #include <LCD.h>
 #include <LiquidCrystal_I2C.h>
@@ -19,6 +18,7 @@
  #define D6_pin  6
  #define D7_pin  7
  LiquidCrystal_I2C lcd(I2C_ADDR,En_pin,Rw_pin,Rs_pin,D4_pin,D5_pin,D6_pin,D7_pin);
+*/
 
 const int potPin1 = A0;
 const int potPin2 = A1;
@@ -81,14 +81,18 @@ boolean stringComplete = false;  // whether the string is complete
 String statusString = "";        // a string to hold the output
 
 void setup(){
+  /*
   Wire.begin(); //start I2C bus
   delay(100); //wait for bus to stabalise
+  */
   pinMode(rlyPin1,OUTPUT); // Setup pins
   pinMode(rlyPin2,OUTPUT); // Setup pins
   pinMode(rlyPin3,OUTPUT); // Setup pins
   pinMode(motorPinDir1,OUTPUT); // Setup pins
   pinMode(motorPinDir2,OUTPUT); // Setup pins
   pinMode(motorPinDir3,OUTPUT); // Setup pins
+  
+  /*
   lcd.begin (16,2); // 2 rows x 16 char
   // Switch on the backlight
   lcd.setBacklightPin(BACKLIGHT_PIN,POSITIVE);
@@ -100,6 +104,7 @@ void setup(){
   lcd.print("SandBox");
   delay(30);
   //lcd.clear();
+  */
   
   //serial
   Serial.begin(115200);
@@ -192,6 +197,7 @@ void read_command() {
 }
 
 // Debug: Show current commands on lcd
+*/
 void lcd_command() {
   lcd.clear();
   lcd.setCursor(0,0);
@@ -200,6 +206,7 @@ void lcd_command() {
           +" L"+String(cmd.lid_pwm)+" "+String(cmd.lid_direction)
           );
 }
+*/
 
 // Send command to the motors
 void do_command() {
