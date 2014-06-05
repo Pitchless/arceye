@@ -243,9 +243,11 @@ void serialEvent() {
   while (Serial.available()) {
     // get the new byte:
     char inChar = (char)Serial.read();
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print(inChar);
+    if (debug == 1){
+       lcd.clear();
+       lcd.setCursor(0,0);
+       lcd.print(inChar);
+    }
     // add it to the inputString:
     inputString += inChar;
     // if the incoming character is a newline, set a flag
