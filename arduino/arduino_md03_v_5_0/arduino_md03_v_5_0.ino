@@ -58,6 +58,7 @@ struct Status {
   int yaw_pos;
   int pitch_pos;
   int lid_pos;
+  int bat_volt;
 };
 
 // 0..255
@@ -237,10 +238,12 @@ void do_command() {
 }
 
 void send_status() {
+  // yaw,pitch,lid,battery
   statusString = "";
   statusString += String(stat.yaw_pos);
   statusString += "," + String(stat.pitch_pos);
   statusString += "," + String(stat.lid_pos);
+  statusString += "," + String(stat.bat_volt);
   Serial.println(statusString);
 }
 
@@ -287,6 +290,7 @@ void lowBattCheck(){
   unsigned long currentMillis = millis();
   if(currentMillis - previousBattCheck > 10000) {
     int battReading = battVolt();
+    stat.bat_volt = battReading;
     switch (battReading) {
       case  18: overBattStatus();                   break;
       case  17: overBattStatus();                   break;
