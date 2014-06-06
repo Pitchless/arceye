@@ -3,7 +3,7 @@
 ****************************************************/
 
 //settings:
-const float referenceVolts = 4.94; //set the refrence multiplyer for the volt meter
+const float referenceVolts = 5.5; //set the refrence multiplyer for the volt meter
 unsigned long previousBattCheck = 10000;
 
 //#define DEBUG 1
