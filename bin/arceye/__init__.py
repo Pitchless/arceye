@@ -193,8 +193,8 @@ class Joint(object):
         elif self.pos <= self.pos_min and cmd < 0:
             # Ignore negative commands under the min
             cmd = 0
-        elif self.in_deadzone():
-            cmd = 0
+        #elif self.in_deadzone():
+        #    cmd = 0
         self.command = cmd
 
     def update_config(self, config):
