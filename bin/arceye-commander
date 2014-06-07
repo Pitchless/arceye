@@ -85,7 +85,7 @@ eye.connect()
 # Start the gui
 pygame.init()
 pygame.display.set_caption("ArcEye")
-screen = pygame.display.set_mode( (320,512) )
+screen = pygame.display.set_mode( (320,620) )
 screen.fill((0, 0, 0))
 guitxt = TextPrint(screen)
 #loginfo("Fonts: %s"%pygame.font.get_fonts())
@@ -198,13 +198,20 @@ while not done:
             guitxt.reset()
             guitxt.color(255,255,0)
             guitxt.text("Frame: %s"%frame)
-            if eye.bat_volt < 18: # over
+            if eye.bat_volt1 < 18: # over
                 guitxt.color(255,0,0)
-            if eye.bat_volt < 14: # normal
+            if eye.bat_volt1 < 14: # normal
                 guitxt.color(0,255,0)
-            if eye.bat_volt < 11: # under
+            if eye.bat_volt1 < 11: # under
                 guitxt.color(255,123,0)
-            guitxt.text("Battery Volt: %s"%eye.bat_volt)
+            guitxt.text("Battery Volt 1: %s"%eye.bat_volt1)
+            if eye.bat_volt2 < 18: # over
+                guitxt.color(255,0,0)
+            if eye.bat_volt2 < 14: # normal
+                guitxt.color(0,255,0)
+            if eye.bat_volt2 < 11: # under
+                guitxt.color(255,123,0)
+            guitxt.text("Battery Volt 2: %s"%eye.bat_volt2)
             #guitxt.text("Status %s"%eye.status)
             guitxt.text("")
             for j in eye.all_joints():

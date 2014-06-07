@@ -192,7 +192,8 @@ class ArcEye(object):
         self.yaw    = Joint("yaw")
         self.pitch  = Joint("pitch")
         self.lid    = Joint("lid")
-        self.bat_volt = 0
+        self.bat_volt1 = 0
+        self.bat_volt2 = 0
 
         self.config = {}
         self.config_file = None
@@ -223,13 +224,14 @@ class ArcEye(object):
             status = self.ser.readline()
             status = status.strip()
             values = status.split(',')
-            if not len(values) == 4:
-                raise Exception("Got wrong number (%s not 3) of values in status (%s), ignoring."%(len(values),status))
+            if not len(values) == 5:
+                raise Exception("Got wrong number (%s not 5) of values in status (%s), ignoring."%(len(values),status))
             self.status = status
             self.yaw.set_pos_raw(float(values[0]))
             self.pitch.set_pos_raw(float(values[1]))
             self.lid.set_pos_raw(float(values[2]))
-            self.bat_volt = float(values[3])
+            self.bat_volt1 = float(values[3])
+            self.bat_volt2 = float(values[4])
         except Exception as e:
             logerr(e)
 
