@@ -15,16 +15,16 @@ yaw:
     pos_center_raw: 842
     pos_max: 60 # scaled
     pos_min: -110 # scaled
-    p: 1.0
+    p: 1.2
     i: 0
     d: 0
 pitch:
     #pwm_limit: 70 #12v
-    pwm_limit: 50 #24v
+    pwm_limit: 90 #24v
     pos_center_raw: 290
     pos_max: 420
     pos_min: -120
-    p: 0.6
+    p: 0.8
     i: 0.0
     d: 0.0
 lid:
