@@ -144,8 +144,10 @@ class Joint(object):
         if self.active:
             self.active = False
             self.command = 0
+            self.target = 0
         else:
             self.active = True
+            self.target = self.pos
         return self.active
 
     def get_pwm(self):
