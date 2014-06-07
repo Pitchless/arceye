@@ -16,7 +16,7 @@ yaw:
     pos_max: 60 # scaled
     pos_min: -110 # scaled
     p: 1.2
-    i: 0
+    i: 0.01
     d: 0
 pitch:
     #pwm_limit: 70 #12v
