@@ -3,9 +3,10 @@
 ****************************************************/
 
 //settings:
-const float referenceVolts = 5.5; //set the refrence multiplyer for the volt meter
+const float refVolt1 = 5.5; //set the refrence multiplyer for volt meter1
+const float refVolt2 = 5.5; //set the refrence multiplyer for volt meter2
 unsigned long previousBattCheck = 10000;
-const int send_delay = 100; //delay between sending packets
+const int send_delay = 100; //delay between sending packets 
 
 //#define DEBUG 1
 #define DEBUG
@@ -41,7 +42,8 @@ const int motorPinSpeed3 = 11;
 const int motorPinDir1 = 2;
 const int motorPinDir2 = 4;
 const int motorPinDir3 = 5;
-const int batteryPin = A3;
+const int battPin1 = A3;
+const int battPin2 = A6;
 const int lowBattLED = 13;
 
 //var
@@ -54,6 +56,8 @@ float speedControl3 = 0; //store the current speed
 long previousMillis = 0;  // store the time LCD was last updated
 long interval = 50; // time between lcd updates
 int lowBattCon = 0; //
+int battReading1 = 0;
+int battReading2 = 0;
 
 struct Status {
   int yaw_pos;
@@ -278,17 +282,18 @@ void serialEvent() {
 #endif
 }
 
-int battVolt() {
-  int val = analogRead(batteryPin); // read the value from the sensor
-  float volts = (10 * val * referenceVolts/1023.0) + 1.2 ; // calculate the ratio. add on the voltage drop due to the diode.
+int battVolt(int pin, int multiplier) { //battPin1, refVolt1
+  int val = analogRead(pin); // read the value from the sensor
+  float volts = (10 * val * multiplier/1023.0) + 1.2 ; // calculate the ratio. add on the voltage drop due to the diode.
   return volts;
   }
 
 void lowBattCheck(){
   unsigned long currentMillis = millis();
   if(currentMillis - previousBattCheck > 10000) {
-    int battReading = battVolt();
-    switch (battReading) {
+    battReading1 = battVolt(battPin1, refVolt1);
+    battReading2 = battVolt(battPin2, refVolt2);
+    switch (battReading1) {
       case  18: overBattStatus();                   break;
       case  17: overBattStatus();                   break;
       case  16: overBattStatus();                   break;
