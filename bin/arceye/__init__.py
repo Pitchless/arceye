@@ -119,6 +119,7 @@ class Joint(object):
         self.pos_center_raw = 0
         self.pos_min   = -100
         self.pos_max   = 100
+        self.deadzone  = 1
         self.brake_cmd = 0
         self.active    = False
         self.pid       = PID()
@@ -150,6 +151,11 @@ class Joint(object):
             self.target = self.pos
         return self.active
 
+    def in_deadzone(self):
+        if abs(self.error) < self.deadzone:
+            return True
+        return False
+
     def get_pwm(self):
         # Dont try to drive motors while breaking
         if self.brake_cmd:
@@ -177,6 +183,9 @@ class Joint(object):
             # Ignore positive commands over the max
             cmd = 0
         elif self.pos <= self.pos_min and cmd < 0:
+            # Ignore negative commands under the min
+            cmd = 0
+        elif self.in_deadzone():
             cmd = 0
         self.command = cmd
 
@@ -288,6 +297,8 @@ class ArcEye(object):
                 self.yaw.pos_max = sub_config['pos_max']
             if sub_config.has_key('pos_min'):
                 self.yaw.pos_min = sub_config['pos_min']
+            if sub_config.has_key('deadzone'):
+                self.yaw.deadzone = sub_config['deadzone']
             if sub_config.has_key('p'):
                 self.yaw.pid.setKp(sub_config['p'])
             if sub_config.has_key('i'):
@@ -304,6 +315,8 @@ class ArcEye(object):
                 self.pitch.pos_max = sub_config['pos_max']
             if sub_config.has_key('pos_min'):
                 self.pitch.pos_min = sub_config['pos_min']
+            if sub_config.has_key('deadzone'):
+                self.pitch.deadzone = sub_config['deadzone']
             if sub_config.has_key('p'):
                 self.pitch.pid.setKp(sub_config['p'])
             if sub_config.has_key('i'):
@@ -320,6 +333,8 @@ class ArcEye(object):
                 self.lid.pos_max = sub_config['pos_max']
             if sub_config.has_key('pos_min'):
                 self.lid.pos_min = sub_config['pos_min']
+            if sub_config.has_key('deadzone'):
+                self.lid.deadzone = sub_config['deadzone']
             if sub_config.has_key('p'):
                 self.lid.pid.setKp(sub_config['p'])
             if sub_config.has_key('i'):

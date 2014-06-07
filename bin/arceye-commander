@@ -234,6 +234,7 @@ while not done:
                 guitxt.indent()
                 guitxt.text("Target: %s"%j.target)
                 guitxt.text("Error: %s"%j.error)
+                guitxt.text("Deadzone: %s"%j.deadzone)
                 guitxt.text("P:%s I:%s D:%s"%(j.pid.Kp, j.pid.Ki, j.pid.Kd))
                 guitxt.unindent()
                 guitxt.unindent()
