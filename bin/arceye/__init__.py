@@ -200,7 +200,7 @@ class ArcEye(object):
         self.config = {}
         self.config_file = None
         self.config_st_mtime = 0
-        self.config_rate = 200
+        self.config_rate = 100
         if config_file:
            self.load_config(config_file)
 

@@ -12,10 +12,10 @@ max_pwm_lid: 120
 yaw:
     #pwm_limit: 50 #12v
     pwm_limit: 40 #24v
-    pos_center_raw: 880
-    pos_max: 45 # scaled
-    pos_min: -130 # scaled
-    p: 0.6
+    pos_center_raw: 842
+    pos_max: 60 # scaled
+    pos_min: -110 # scaled
+    p: 1.0
     i: 0
     d: 0
 pitch:
