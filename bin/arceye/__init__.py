@@ -232,6 +232,7 @@ class ArcEye(object):
         self.retry_connect_timeout = 123
         self._retry_connect_count = self.retry_connect_timeout
         self.status = None
+        self.command_rate = 1
         self.last_cmd = ""
         self.yaw    = Joint("yaw")
         self.pitch  = Joint("pitch")
@@ -313,6 +314,8 @@ class ArcEye(object):
                     self.connect()
             for j in self.all_joints():
                 j.update()
+            if self.command_rate != 1 and self.frame % self.command_rate == 0:
+                self.send_commands()
             # avoid lots of stat calls
             if self.config_file and self.config_rate > 0 and self.frame % self.config_rate == 0:
                 if os.stat(self.config_file).st_mtime > self.config_st_mtime:
@@ -343,7 +346,13 @@ class ArcEye(object):
 
     def update_config(self, config):
         """Update with the new config, dict of dicts etc, return from yaml parse"""
-        if config is None: return
+        if config is None:
+            return
+        if config.has_key('port'):
+            self.port = config['port']
+        if config.has_key('command_rate'):
+            self.command_rate = config['command_rate']
+        # Joints
         if config.has_key('yaw'):
             self.yaw.update_config(config['yaw'])
         if config.has_key('pitch'):
