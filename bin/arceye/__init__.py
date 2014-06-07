@@ -197,6 +197,28 @@ class Joint(object):
             cmd = 0
         self.command = cmd
 
+    def update_config(self, config):
+        """Update with the new config, dict of dicts etc, return from yaml parse"""
+        if config is None: return
+        if config.has_key('pwm_limit'):
+            self.pwm_limit = config['pwm_limit']
+        if config.has_key('pos_center_raw'):
+            self.pos_center_raw = config['pos_center_raw']
+        if config.has_key('pos_max'):
+            self.pos_max = config['pos_max']
+        if config.has_key('pos_min'):
+            self.pos_min = config['pos_min']
+        if config.has_key('deadzone'):
+            self.deadzone = config['deadzone']
+        if config.has_key('reverse'):
+            self.reverse = config['reverse']
+        if config.has_key('p'):
+            self.pid.setKp(config['p'])
+        if config.has_key('i'):
+            self.pid.setKi(config['i'])
+        if config.has_key('d'):
+            self.pid.setKd(config['d'])
+
 
 class ArcEye(object):
     """
@@ -296,64 +318,9 @@ class ArcEye(object):
         """Update with the new config, dict of dicts etc, return from yaml parse"""
         if config is None: return
         if config.has_key('yaw'):
-            sub_config = config['yaw']
-            if sub_config.has_key('pwm_limit'):
-                self.yaw.pwm_limit = sub_config['pwm_limit']
-            if sub_config.has_key('pos_center_raw'):
-                self.yaw.pos_center_raw = sub_config['pos_center_raw']
-            if sub_config.has_key('pos_max'):
-                self.yaw.pos_max = sub_config['pos_max']
-            if sub_config.has_key('pos_min'):
-                self.yaw.pos_min = sub_config['pos_min']
-            if sub_config.has_key('deadzone'):
-                self.yaw.deadzone = sub_config['deadzone']
-            if sub_config.has_key('reverse'):
-                self.yaw.reverse = sub_config['reverse']
-            if sub_config.has_key('p'):
-                self.yaw.pid.setKp(sub_config['p'])
-            if sub_config.has_key('i'):
-                self.yaw.pid.setKi(sub_config['i'])
-            if sub_config.has_key('d'):
-                self.yaw.pid.setKd(sub_config['d'])
+            self.yaw.update_config(config['yaw'])
         if config.has_key('pitch'):
-            sub_config = config['pitch']
-            if sub_config.has_key('pwm_limit'):
-                self.pitch.pwm_limit = sub_config['pwm_limit']
-            if sub_config.has_key('pos_center_raw'):
-                self.pitch.pos_center_raw = sub_config['pos_center_raw']
-            if sub_config.has_key('pos_max'):
-                self.pitch.pos_max = sub_config['pos_max']
-            if sub_config.has_key('pos_min'):
-                self.pitch.pos_min = sub_config['pos_min']
-            if sub_config.has_key('deadzone'):
-                self.pitch.deadzone = sub_config['deadzone']
-            if sub_config.has_key('reverse'):
-                self.pitch.reverse = sub_config['reverse']
-            if sub_config.has_key('p'):
-                self.pitch.pid.setKp(sub_config['p'])
-            if sub_config.has_key('i'):
-                self.pitch.pid.setKi(sub_config['i'])
-            if sub_config.has_key('d'):
-                self.pitch.pid.setKd(sub_config['d'])
+            self.pitch.update_config(config['pitch'])
         if config.has_key('lid'):
-            sub_config = config['lid']
-            if sub_config.has_key('pwm_limit'):
-                self.lid.pwm_limit = sub_config['pwm_limit']
-            if sub_config.has_key('pos_center_raw'):
-                self.lid.pos_center_raw = sub_config['pos_center_raw']
-            if sub_config.has_key('pos_max'):
-                self.lid.pos_max = sub_config['pos_max']
-            if sub_config.has_key('pos_min'):
-                self.lid.pos_min = sub_config['pos_min']
-            if sub_config.has_key('deadzone'):
-                self.lid.deadzone = sub_config['deadzone']
-            if sub_config.has_key('reverse'):
-                self.lid.reverse = sub_config['reverse']
-            if sub_config.has_key('p'):
-                self.lid.pid.setKp(sub_config['p'])
-            if sub_config.has_key('i'):
-                self.lid.pid.setKi(sub_config['i'])
-            if sub_config.has_key('d'):
-                self.lid.pid.setKd(sub_config['d'])
-
+            self.lid.update_config(config['lid'])
 
