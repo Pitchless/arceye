@@ -20,13 +20,14 @@ yaw:
     d: 0
 pitch:
     #pwm_limit: 70 #12v
-    pwm_limit: 90 #24v
+    pwm_limit: 80 #24v
     pos_center_raw: 290
     pos_max: 420
     pos_min: -120
-    p: 0.8
+    deadzone: 8
+    p: 0.9
     i: 0.0
-    d: 0.0
+    d: 0.2
 lid:
     pwm_limit: 35
     pos_center_raw: 484
