@@ -131,6 +131,9 @@ while not done:
             for j in eye.all_joints():
                 j.command = 0
                 j.active = False
+        elif keys[pygame.K_0]:
+            for j in eye.all_joints():
+                j.target = 0
         elif keys[pygame.K_F1]:
             show_help = False if show_help else True
         elif keys[pygame.K_a]:
