@@ -134,6 +134,10 @@ class Joint(object):
 
     @target.setter
     def target(self, value):
+        if value > self.pos_max:
+            value = self.pos_max
+        elif value < self.pos_min:
+            value = self.pos_min
         self.pid.setPoint(value)
 
     @property
