@@ -235,6 +235,7 @@ while not done:
                 guitxt.text("PWM: %s Dir:%s Reverse:%s"%(
                     j.get_pwm(),j.get_direction(), j.reverse))
                 guitxt.text("Brake: %s"%j.brake_cmd)
+                guitxt.color(0,255,0) if j.active else guitxt.color(0,100,0)
                 guitxt.text("Active: %s"%j.active)
                 guitxt.indent()
                 guitxt.text("Target: %s"%j.target)
