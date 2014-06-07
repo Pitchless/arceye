@@ -1,5 +1,5 @@
 from __future__ import print_function
-import sys, os
+import sys, os, datetime
 import yaml
 from serial import Serial, SerialException
 from time import sleep
@@ -9,10 +9,10 @@ from time import sleep
 #
 
 def loginfo(*msg):
-    print("INFO:", *msg)
+    print("[%s] INFO: "%datetime.datetime.now(), *msg)
 
 def logerr(*msg):
-    print("ERROR:", *msg, file=sys.stderr)
+    print("[%s] ERROR:"%datetime.datetime.now(), *msg, file=sys.stderr)
 
 
 # The recipe gives simple implementation of a Discrete
