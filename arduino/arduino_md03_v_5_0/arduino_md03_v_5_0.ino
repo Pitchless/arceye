@@ -5,6 +5,7 @@
 //settings:
 const float referenceVolts = 5.5; //set the refrence multiplyer for the volt meter
 unsigned long previousBattCheck = 10000;
+const int send_delay = 100; //delay between sending packets
 
 //#define DEBUG 1
 #define DEBUG
@@ -141,7 +142,7 @@ void loop(){
   //direct2 = manualSpeedControl(motorPinSpeed2, potPin2, rlyPin2, motorPinDir2, direct2, speedControl2);
   //direct3 = manualSpeedControl(motorPinSpeed3, potPin3, rlyPin3, motorPinDir3, direct3, speedControl3);
   
-  if (millis() - send_time >= 10) {
+  if (millis() - send_time >= send_delay) {
     send_time = millis();
     send_status();
   }
