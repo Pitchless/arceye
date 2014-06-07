@@ -9,7 +9,7 @@ from time import sleep
 #
 
 def loginfo(*msg):
-    print("[%s] INFO: "%datetime.datetime.now(), *msg)
+    print("[%s] INFO: "%datetime.datetime.now(), *msg, file=sys.stderr)
 
 def logerr(*msg):
     print("[%s] ERROR:"%datetime.datetime.now(), *msg, file=sys.stderr)
@@ -228,6 +228,9 @@ class ArcEye(object):
     """
     def __init__(self, port="/dev/ttyUSB0", config_file=None):
         self.port   = port
+        self.is_connected = False
+        self.retry_connect_timeout = 123
+        self._retry_connect_count = self.retry_connect_timeout
         self.status = None
         self.last_cmd = ""
         self.yaw    = Joint("yaw")
@@ -245,24 +248,29 @@ class ArcEye(object):
 
         self.frame = 0
 
-
     def all_joints(self):
         return (self.yaw, self.pitch, self.lid)
 
     def connect(self):
-        try:
-            self.ser = Serial(self.port, 115200)
-        except SerialException as e:
-            logerr("Failed to connect to arduino serial. Is it plugged in?\n", e)
-            return False
+        """
+        Try to connect to the board. Throws if problems.
+        Note that the class auto connects on the first status read, handling
+        errors and re-connect logic, so you don't normally need to call this
+        direct.
+        """
+        self.is_connected = False
+        self._retry_connect_count = self.retry_connect_timeout
+        self.ser = Serial(self.port, 115200)
+        self.is_connected = True
         sleep(3) # wait for the board to reset
         loginfo("Connected to %s"%self.port)
         return True
 
     def read_status(self):
+        if not self.is_connected: return
         try:
-            # yaw,pitch,lid,battery
             status = self.ser.readline()
+            # yaw,pitch,lid,battery
             status = status.strip()
             values = status.split(',')
             if not len(values) == 5:
@@ -273,27 +281,46 @@ class ArcEye(object):
             self.lid.set_pos_raw(float(values[2]))
             self.bat_volt1 = float(values[3])
             self.bat_volt2 = float(values[4])
+        except SerialException as e:
+            self.is_connected = False
+            logerr("Serial exception (retry in %s): %s"%(self.retry_connect_timeout,e))
         except Exception as e:
             logerr(e)
 
     def send_commands(self):
+        if not self.is_connected: return
         cmd = ""
         cmd = "%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(
             self.yaw.get_pwm(), self.yaw.get_direction(), self.yaw.get_brake_cmd(),
             self.pitch.get_pwm(), self.pitch.get_direction(), self.pitch.get_brake_cmd(),
             self.lid.get_pwm(), self.lid.get_direction(), self.lid.get_brake_cmd(),
                 )
-        self.ser.write(cmd)
+        try:
+            self.ser.write(cmd)
+        except SerialException as e:
+            self.is_connected = False
+            logerr("Serial exception (retry in %s): %s"%(self.retry_connect_timeout,e))
+        except Exception as e:
+            logerr(e)
         self.last_cmd = cmd
 
     def update(self):
         self.frame += 1
-        for j in self.all_joints():
-            j.update()
-        # avoid lots of stat calls
-        if self.config_file and self.config_rate > 0 and self.frame % self.config_rate == 0:
-            if os.stat(self.config_file).st_mtime > self.config_st_mtime:
-                self.reload_config()
+        try:
+            if not self.is_connected:
+                self._retry_connect_count -= 1
+                if self._retry_connect_count < 0:
+                    self.connect()
+            for j in self.all_joints():
+                j.update()
+            # avoid lots of stat calls
+            if self.config_file and self.config_rate > 0 and self.frame % self.config_rate == 0:
+                if os.stat(self.config_file).st_mtime > self.config_st_mtime:
+                    self.reload_config()
+        except SerialException as e:
+            logerr("Serial exception (retry in %s): %s"%(self.retry_connect_timeout,e))
+        except Exception as e:
+            logerr(e)
 
     def load_config(self, config_file):
         """Load config from a (yaml) config file."""

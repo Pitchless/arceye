@@ -80,7 +80,6 @@ def joint_ui_command(joint,val):
 # Setup the eye
 eye = ArcEye(port)
 eye.load_config(config_file)
-eye.connect()
 
 # Start the gui
 pygame.init()
