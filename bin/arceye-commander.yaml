@@ -29,8 +29,10 @@ pitch:
     i: 0.0
     d: 0.2
 lid:
-    pwm_limit: 35
-    pos_center_raw: 484
-    pos_max: 101
-    pos_min: -101
-    p: 0.1
+    pwm_limit: 100
+    pos_center_raw: 370
+    pos_max: 211
+    pos_min: 0
+    p: 2
+    i: 0
+    d: 0
