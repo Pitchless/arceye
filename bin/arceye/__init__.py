@@ -120,6 +120,7 @@ class Joint(object):
         self.pos_min   = -100
         self.pos_max   = 100
         self.deadzone  = 1
+        self.reverse   = False
         self.brake_cmd = 0
         self.active    = False
         self.pid       = PID()
@@ -170,9 +171,12 @@ class Joint(object):
         return pwm
 
     def get_direction(self):
+        direc = 1
         if self.command < 0:
-            return 0
-        return 1
+            direc = 0
+        if self.reverse:
+            direc = 1 if direc == 0 else 0
+        return direc
 
     def get_brake_cmd(self):
         if self.brake_cmd:
@@ -303,6 +307,8 @@ class ArcEye(object):
                 self.yaw.pos_min = sub_config['pos_min']
             if sub_config.has_key('deadzone'):
                 self.yaw.deadzone = sub_config['deadzone']
+            if sub_config.has_key('reverse'):
+                self.yaw.reverse = sub_config['reverse']
             if sub_config.has_key('p'):
                 self.yaw.pid.setKp(sub_config['p'])
             if sub_config.has_key('i'):
@@ -321,6 +327,8 @@ class ArcEye(object):
                 self.pitch.pos_min = sub_config['pos_min']
             if sub_config.has_key('deadzone'):
                 self.pitch.deadzone = sub_config['deadzone']
+            if sub_config.has_key('reverse'):
+                self.pitch.reverse = sub_config['reverse']
             if sub_config.has_key('p'):
                 self.pitch.pid.setKp(sub_config['p'])
             if sub_config.has_key('i'):
@@ -339,6 +347,8 @@ class ArcEye(object):
                 self.lid.pos_min = sub_config['pos_min']
             if sub_config.has_key('deadzone'):
                 self.lid.deadzone = sub_config['deadzone']
+            if sub_config.has_key('reverse'):
+                self.lid.reverse = sub_config['reverse']
             if sub_config.has_key('p'):
                 self.lid.pid.setKp(sub_config['p'])
             if sub_config.has_key('i'):

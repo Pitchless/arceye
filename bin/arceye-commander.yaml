@@ -30,9 +30,10 @@ pitch:
     d: 0.2
 lid:
     pwm_limit: 100
-    pos_center_raw: 370
+    pos_center_raw: 0
     pos_max: 211
     pos_min: 0
+    reverse: true
     p: 2
     i: 0
     d: 0

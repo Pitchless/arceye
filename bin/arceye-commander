@@ -232,7 +232,8 @@ while not done:
                 guitxt.text("Position: %s (%s..%s)"%(j.pos, j.pos_min, j.pos_max))
                 guitxt.color(0,255,0)
                 guitxt.text("Command: %s"%j.command)
-                guitxt.text("PWM: %s Dir:%s"%(j.get_pwm(),j.get_direction()))
+                guitxt.text("PWM: %s Dir:%s Reverse:%s"%(
+                    j.get_pwm(),j.get_direction(), j.reverse))
                 guitxt.text("Brake: %s"%j.brake_cmd)
                 guitxt.text("Active: %s"%j.active)
                 guitxt.indent()
