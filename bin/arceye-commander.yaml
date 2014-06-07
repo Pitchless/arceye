@@ -10,18 +10,20 @@ max_pwm_pitch: 50
 max_pwm_lid: 120
 # The joints
 yaw:
-    pwm_limit: 50
-    pos_center_raw: 900
-    pos_max: 63 # scaled
-    pos_min: -55 # scaled
-    p: 0.2
+    #pwm_limit: 50 #12v
+    pwm_limit: 40 #24v
+    pos_center_raw: 880
+    pos_max: 45 # scaled
+    pos_min: -130 # scaled
+    p: 0.6
     i: 0
-    d: 1.0
+    d: 0
 pitch:
-    pwm_limit: 100
-    pos_center_raw: 450
-    pos_max: 500
-    pos_min: -200
+    #pwm_limit: 70 #12v
+    pwm_limit: 50 #24v
+    pos_center_raw: 290
+    pos_max: 420
+    pos_min: -120
     p: 0.6
     i: 0.0
     d: 0.0
