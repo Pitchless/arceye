@@ -190,7 +190,8 @@ while not done:
             screen.fill((0,0,0))
             guitxt.reset()
             guitxt.color(255,255,0)
-            guitxt.text("Frame: %s"%frame)
+            guitxt.text("Frame: %s"%eye.frame)
+            guitxt.text("Connected: %s"%eye.is_connected)
             if eye.bat_volt1 < 18: # over
                 guitxt.color(255,0,0)
             if eye.bat_volt1 < 14: # normal
@@ -205,7 +206,6 @@ while not done:
             if eye.bat_volt2 < 11: # under
                 guitxt.color(255,123,0)
             guitxt.text("Battery Volt 2: %s"%eye.bat_volt2)
-            #guitxt.text("Status %s"%eye.status)
             guitxt.text("")
             for j in eye.all_joints():
                 guitxt.color(255,255,0)
@@ -230,6 +230,9 @@ while not done:
                 guitxt.text("P:%s I:%s D:%s"%(j.pid.Kp, j.pid.Ki, j.pid.Kd))
                 guitxt.unindent()
                 guitxt.unindent()
+            guitxt.color(0,255,0)
+            guitxt.text("Status %s"%eye.status)
+            guitxt.text("Command %s"%eye.last_cmd)
 
         # Go ahead and update the screen with what we've drawn.
         pygame.display.flip()
