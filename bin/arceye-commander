@@ -29,7 +29,7 @@ if config.has_key('max_pwm_lid'): max_pwm_lid = config['max_pwm_lid']
 
 
 # This is a simple pygame class that will help us print to the screen
-class TextPrint:
+class GuiText:
     def __init__(self, screen, text_color=(0,255,0), font=None):
         self.reset()
         self.screen     = screen
@@ -92,7 +92,7 @@ pygame.init()
 pygame.display.set_caption("ArcEye")
 screen = pygame.display.set_mode( (320,620) )
 screen.fill((0, 0, 0))
-guitxt = TextPrint(screen)
+guitxt = GuiText(screen)
 #loginfo("Fonts: %s"%pygame.font.get_fonts())
 guitxt.font("droidsansmono", 14)
 
