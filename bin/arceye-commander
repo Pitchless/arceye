@@ -15,7 +15,11 @@ if len(sys.argv) > 1:
 
 dead_zone = 0.1
 if config.has_key('dead_zone'): dead_zone = config['dead_zone']
-# Used to scale the joystick axis
+# Which axis for which joint. Works with stick axis, triggers may be odd.
+yaw_axis=0
+pitch_axis=1
+lid_axis=4
+# Used to scale the joystick axis in command mode
 max_pwm_yaw = 50
 max_pwm_pitch = 50
 max_pwm_lid = 120
@@ -68,6 +72,17 @@ def joint_ui_command(joint,val):
     else:
         joint.command += val
 
+def joy_axis_command(j,axis):
+    if not axis == 0:
+        axis = ( axis - (dead_zone*axis/abs(axis)) )/dead_zone
+    if j.active: # pid is running
+        if axis >= 0:
+            j.target = axis * abs(j.pos_max)
+        else:
+            j.target = axis * abs(j.pos_min)
+    else:
+        j.command = axis * max_pwm_yaw
+
 # Setup the eye
 eye = ArcEye()
 eye.load_config(config_file)
@@ -105,9 +120,9 @@ while not done:
             if event.type == pygame.QUIT: # If user clicked close
                 done=True # Flag that we are done so we exit this loop
             elif event.type == pygame.JOYAXISMOTION:
-                eye.yaw.command = dead_zoned(joystick.get_axis(0)) * max_pwm_yaw;
-                eye.pitch.command = dead_zoned(joystick.get_axis(1)) * max_pwm_pitch;
-                eye.lid.command = dead_zoned(joystick.get_axis(2)) * max_pwm_lid;
+                joy_axis_command(eye.yaw, dead_zoned(joystick.get_axis(yaw_axis)));
+                joy_axis_command(eye.pitch, dead_zoned(joystick.get_axis(pitch_axis)));
+                joy_axis_command(eye.lid, dead_zoned(joystick.get_axis(lid_axis)));
             if event.type == pygame.JOYBUTTONDOWN:
                 print("Joystick button pressed.")
             if event.type == pygame.JOYBUTTONUP:
