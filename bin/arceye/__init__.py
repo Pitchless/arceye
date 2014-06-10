@@ -314,7 +314,7 @@ class ArcEye(object):
                     self.connect()
             for j in self.all_joints():
                 j.update()
-            if self.command_rate != 1 and self.frame % self.command_rate == 0:
+            if self.command_rate == 1 or self.frame % self.command_rate == 0:
                 self.send_commands()
             # avoid lots of stat calls
             if self.config_file and self.config_rate > 0 and self.frame % self.config_rate == 0:
