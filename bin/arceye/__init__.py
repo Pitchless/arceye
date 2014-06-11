@@ -148,7 +148,6 @@ class Joint(object):
             value = self.pos_max
         elif value < self.pos_min:
             value = self.pos_min
-            loginfo("Set target: %s"%value)
         self.pid.setPoint(value)
 
     @property
@@ -177,9 +176,9 @@ class Joint(object):
     def toggle_active(self):
         """Turn the PID loop control on and off."""
         if self.active:
-            self.activate()
-        else:
             self.deactivate()
+        else:
+            self.activate()
         return self.active
 
     def activate(self):
@@ -465,6 +464,8 @@ class Robot(object):
         if self.eye2: self.eye2.stop()
 
     def zero_target(self):
-        for j in self.eye1.all_joints(): j.target = 0
-        for j in self.eye2.all_joints(): j.target = 0
+        if self.eye1:
+            for j in self.eye1.all_joints(): j.target = 0
+        if self.eye2:
+            for j in self.eye2.all_joints(): j.target = 0
 

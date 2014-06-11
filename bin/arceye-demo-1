@@ -66,11 +66,13 @@ gui.eyes.eye1.activate()
 
 while not gui.done:
     loginfo("Hello")
-    gui.eyes.eye1.go_to(0.5, 0.0)
-    sleep(10)
+    gui.eyes.eye1.go_to(0.7, 0.0)
+    sleep(6)
     gui.eyes.eye1.go_to(0.0, 0.0)
-    sleep(10)
-    gui.eyes.eye1.go_to(-0.5, 0.0)
-    sleep(10)
+    sleep(6)
+    gui.eyes.eye1.go_to(-0.7, 0.0)
+    sleep(6)
+    gui.eyes.eye1.go_to(0.0, 0.0)
+    sleep(6)
 
 gui.eyes.eye1.deactivate()
