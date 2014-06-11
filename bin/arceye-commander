@@ -85,6 +85,8 @@ class Commander(GuiBase):
         elif keys[pygame.K_0]:
             for j in self.eye1.all_joints(): j.target = 0
             for j in self.eye2.all_joints(): j.target = 0
+
+        # Eyey1
         elif keys[pygame.K_a]:
             joint_ui_command(self.eye1.yaw, 1)
         elif keys[pygame.K_d]:
@@ -98,21 +100,47 @@ class Commander(GuiBase):
         elif keys[pygame.K_q]:
             joint_ui_command(self.eye1.lid, -1)
 
-        # Brakes
+        # Eye2
+        elif keys[pygame.K_j]:
+            joint_ui_command(self.eye2.yaw, 1)
+        elif keys[pygame.K_l]:
+            joint_ui_command(self.eye2.yaw, -1)
+        elif keys[pygame.K_i]:
+            joint_ui_command(self.eye2.pitch, 1)
+        elif keys[pygame.K_k]:
+            joint_ui_command(self.eye2.pitch, -1)
+        elif keys[pygame.K_u]:
+            joint_ui_command(self.eye2.lid, 1)
+        elif keys[pygame.K_o]:
+            joint_ui_command(self.eye2.lid, -1)
+
+        # Brakes eye1
         elif keys[pygame.K_LSHIFT] and keys[pygame.K_z]:
             self.eye1.yaw.brake_cmd = 0
         elif keys[pygame.K_z]:
             self.eye1.yaw.brake_cmd = 1
-
         elif keys[pygame.K_LSHIFT] and keys[pygame.K_x]:
             self.eye1.pitch.brake_cmd = 0
         elif keys[pygame.K_x]:
             self.eye1.pitch.brake_cmd = 1
-
         elif keys[pygame.K_LSHIFT] and keys[pygame.K_c]:
             self.eye1.lid.brake_cmd = 0
         elif keys[pygame.K_c]:
             self.eye1.lid.brake_cmd = 1
+
+        # Brakes eye2
+        elif keys[pygame.K_LSHIFT] and keys[pygame.K_b]:
+            self.eye2.yaw.brake_cmd = 0
+        elif keys[pygame.K_b]:
+            self.eye2.yaw.brake_cmd = 1
+        elif keys[pygame.K_LSHIFT] and keys[pygame.K_n]:
+            self.eye2.pitch.brake_cmd = 0
+        elif keys[pygame.K_n]:
+            self.eye2.pitch.brake_cmd = 1
+        elif keys[pygame.K_LSHIFT] and keys[pygame.K_m]:
+            self.eye2.lid.brake_cmd = 0
+        elif keys[pygame.K_m]:
+            self.eye2.lid.brake_cmd = 1
 
         # Controllers on/off
         elif keys[pygame.K_1]:
@@ -129,17 +157,17 @@ class Commander(GuiBase):
             self.eye2.lid.toggle_active()
 
     def display_help(self):
-        self.guitxt.text("SPACE  - Zero commands and controllers.")
-        self.guitxt.text("a - yaw left")
-        self.guitxt.text("d - yaw right")
-        self.guitxt.text("w - pitch up")
-        self.guitxt.text("s - pitch down")
-        self.guitxt.text("q - lid")
-        self.guitxt.text("e - lid")
-        self.guitxt.text("1,2,3 - eye1 toggle yaw,pitch,lid controller (PID)")
-        self.guitxt.text("4,5,6 - eye2 toggle yaw,pitch,lid controller (PID)")
-        self.guitxt.text("z,x,c - eye1 yaw,pitch,lid brake on")
-        self.guitxt.text("Z,X,C - eye1 yaw,pitch,lid brake on")
+        self.guitxt.text("SPACE   - Zero commands and controllers.")
+        self.guitxt.text("w,a,s,d - eye1 yaw, pitch")
+        self.guitxt.text("q,e     - eye1 lid")
+        self.guitxt.text("j,l,i,k - eye2 yaw, pitch")
+        self.guitxt.text("u,o     - eye2 lid")
+        self.guitxt.text("1,2,3   - eye1 toggle yaw,pitch,lid controller (PID)")
+        self.guitxt.text("4,5,6   - eye2 toggle yaw,pitch,lid controller (PID)")
+        self.guitxt.text("z,x,c   - eye1 yaw,pitch,lid brake on")
+        self.guitxt.text("Z,X,C   - eye1 yaw,pitch,lid brake on")
+        self.guitxt.text("b,n,m   - eye2 yaw,pitch,lid brake on")
+        self.guitxt.text("B,N,M   - eye2 yaw,pitch,lid brake on")
         self.guitxt.text("")
         self.guitxt.text("Left Stick - yaw")
         self.guitxt.text("Right Stick - pitch")
