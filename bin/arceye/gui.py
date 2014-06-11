@@ -116,7 +116,7 @@ class GuiBase(object):
         self.guitxt.text("Frame: %s"%self.eye1.frame)
 
     def display_eye(self, eye):
-        self.guitxt.text("Eye")
+        self.guitxt.text("Eye %s"%eye.port)
         self.guitxt.text("Connected: %s"%eye.is_connected)
         if eye.bat_volt1 < 18: # over
             self.guitxt.color(255,0,0)

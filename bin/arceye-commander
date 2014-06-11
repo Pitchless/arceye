@@ -13,6 +13,11 @@ if len(sys.argv) > 1:
     config_file = sys.argv[1]
     config = yaml.load(file(sys.argv[1]))
 
+config_file_2 = None
+if len(sys.argv) > 2:
+    config_file = sys.argv[2]
+    config = yaml.load(file(sys.argv[2]))
+
 dead_zone = 0.1
 if config.has_key('dead_zone'): dead_zone = config['dead_zone']
 # Which axis for which joint. Works with stick axis, triggers may be odd.
@@ -140,6 +145,6 @@ class Commander(GuiBase):
         self.display_eye(self.eye2)
         self.guitxt.x = 10
 
-gui = Commander(config1=config_file)
+gui = Commander(config1=config_file, config2=config_file_2)
 gui.init()
 gui.run()
