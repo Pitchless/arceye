@@ -37,16 +37,18 @@ class GuiText(object):
 
 
 class GuiBase(object):
-    def __init__(self, name = "ArcEye", w=320, h=620, config_file=None):
-        self.config_file = config_file
-        self.name        = name
-        self.frame       = 0
-        self.w           = w
-        self.h           = h
-        self.done        = False
-        self.show_help   = False
-        self.eye         = ArcEye()
-        self.screen      = None
+    def __init__(self, name = "ArcEye", w=320, h=620, config1=None, config2=None):
+        self.config1   = config1
+        self.config2   = config1
+        self.name      = name
+        self.frame     = 0
+        self.w         = w
+        self.h         = h
+        self.done      = False
+        self.show_help = False
+        self.eye1      = ArcEye(config_file=self.config1)
+        self.eye2      = ArcEye(config_file="arse")
+        self.screen    = None
 
     def init(self):
         # Start the gui
@@ -58,13 +60,13 @@ class GuiBase(object):
         self.guitxt = GuiText(self.screen)
         #loginfo("Fonts: %s"%pygame.font.get_fonts())
         self.guitxt.font("droidsansmono", 14)
-        self.eye.load_config(self.config_file)
 
     def run(self):
         while not self.done:
             self.frame += 1
             # Read eye status
-            self.eye.read_status()
+            self.eye1.read_status()
+            self.eye2.read_status()
             # Check for gui events
             for event in pygame.event.get(): # User did something
                 if event.type == pygame.QUIT: # If user clicked close
@@ -80,7 +82,8 @@ class GuiBase(object):
             else:
                 self.handle_keys_pressed(keys)
             # Update the eye and it's joints (runs their pids)
-            self.eye.update()
+            self.eye1.update()
+            self.eye2.update()
             # Update the display
             self.screen.fill((0,0,0))
             self.guitxt.reset()
@@ -110,25 +113,26 @@ class GuiBase(object):
         pass
 
     def display_header(self):
-        self.guitxt.text("Frame: %s"%self.eye.frame)
-        self.guitxt.text("Connected: %s"%self.eye.is_connected)
-        if self.eye.bat_volt1 < 18: # over
-            self.guitxt.color(255,0,0)
-        if self.eye.bat_volt1 < 14: # normal
-            self.guitxt.color(0,255,0)
-        if self.eye.bat_volt1 < 11: # under
-            self.guitxt.color(255,123,0)
-        self.guitxt.text("Battery Volt 1: %s"%self.eye.bat_volt1)
-        if self.eye.bat_volt2 < 18: # over
-            self.guitxt.color(255,0,0)
-        if self.eye.bat_volt2 < 14: # normal
-            self.guitxt.color(0,255,0)
-        if self.eye.bat_volt2 < 11: # under
-            self.guitxt.color(255,123,0)
-        self.guitxt.text("Battery Volt 2: %s"%self.eye.bat_volt2)
-        self.guitxt.text("")
+        self.guitxt.text("Frame: %s"%self.eye1.frame)
 
     def display_eye(self, eye):
+        self.guitxt.text("Eye")
+        self.guitxt.text("Connected: %s"%eye.is_connected)
+        if eye.bat_volt1 < 18: # over
+            self.guitxt.color(255,0,0)
+        if eye.bat_volt1 < 14: # normal
+            self.guitxt.color(0,255,0)
+        if eye.bat_volt1 < 11: # under
+            self.guitxt.color(255,123,0)
+        self.guitxt.text("Battery Volt 1: %s"%eye.bat_volt1)
+        if eye.bat_volt2 < 18: # over
+            self.guitxt.color(255,0,0)
+        if eye.bat_volt2 < 14: # normal
+            self.guitxt.color(0,255,0)
+        if eye.bat_volt2 < 11: # under
+            self.guitxt.color(255,123,0)
+        self.guitxt.text("Battery Volt 2: %s"%eye.bat_volt2)
+        self.guitxt.indent()
         for j in eye.all_joints():
             self.guitxt.color(255,255,0)
             self.guitxt.text(j.name)
@@ -152,3 +156,6 @@ class GuiBase(object):
             self.guitxt.text("P:%s I:%s D:%s"%(j.pid.Kp, j.pid.Ki, j.pid.Kd))
             self.guitxt.unindent()
             self.guitxt.unindent()
+        self.guitxt.color(0,255,0)
+        self.guitxt.text("Status %s"%eye.status)
+        self.guitxt.text("Command %s"%eye.last_cmd)
