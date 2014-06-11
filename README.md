@@ -7,6 +7,10 @@ Versions
 --------
 These are git tags.
 
+v0.5 - 11th June 2014
+
+* The last one eye version.
+
 v0.4 - 5th June 2014
 
 * DEBUG option to not include LCD code.
