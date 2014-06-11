@@ -3,8 +3,8 @@
 ****************************************************/
 
 //settings:
-const float refVolt1 = 5.5; //set the refrence multiplyer for volt meter1
-const float refVolt2 = 5.5; //set the refrence multiplyer for volt meter2
+const float refVolt1 = 6; //set the refrence multiplyer for volt meter1
+const float refVolt2 = 6; //set the refrence multiplyer for volt meter2
 unsigned long previousBattCheck = 10000;
 const int send_delay = 100; //delay between sending packets 
 
