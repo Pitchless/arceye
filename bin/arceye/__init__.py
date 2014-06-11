@@ -401,3 +401,11 @@ class Robot(object):
         if self.eye2:
             self.eye2.update()
 
+    def stop(self):
+        if self.eye1: self.eye1.stop()
+        if self.eye2: self.eye2.stop()
+
+    def zero_target(self):
+        for j in self.eye1.all_joints(): j.target = 0
+        for j in self.eye2.all_joints(): j.target = 0
+
