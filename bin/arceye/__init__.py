@@ -148,7 +148,27 @@ class Joint(object):
             value = self.pos_max
         elif value < self.pos_min:
             value = self.pos_min
+            loginfo("Set target: %s"%value)
         self.pid.setPoint(value)
+
+    @property
+    def target_rel(self):
+        value = self.target
+        if value == 0:
+            return 0
+        if value > 0:
+            return (self.pos_min/value)
+        return -(abs(self.pos_min)/abs(value))
+
+    @target_rel.setter
+    def target_rel(self, value):
+        """Set a target as -1..1 range of the joints full motion."""
+        if value == 0:
+            self.target = 0
+        elif value > 0:
+            self.target = value * self.pos_max
+        else:
+            self.target = value * abs(self.pos_min)
 
     @property
     def error(self):
@@ -333,11 +353,24 @@ class ArcEye(object):
             if not self.is_connected:
                 self._retry_connect_count -= 1
                 if self._retry_connect_count < 0:
-                    self.connect()
+                    return self.connect()
+
+            if self.target:
+                if self.target.x is not None:
+                    loginfo("TARGET! %s"%self.target.x)
+                    self.yaw.target_rel = self.target.x
+                if self.target.y is not None:
+                    self.pitch.target_rel = self.target.y
+                if self.target.l is not None:
+                    self.lid.target_rel = self.target.l
+                self.target = None
+
             for j in self.all_joints():
                 j.update()
+
             if self.command_rate == 1 or self.frame % self.command_rate == 0:
                 self.send_commands()
+
             # avoid lots of stat calls
             if self.config_file and self.config_rate > 0 and self.frame % self.config_rate == 0:
                 if os.stat(self.config_file).st_mtime > self.config_st_mtime:
@@ -394,8 +427,10 @@ class ArcEye(object):
         for j in self.all_joints():
             j.command = 0
             j.active = False
+            j.target = None
 
     def go_to(self, x=None, y=None, l=None):
+        loginfo("Goto %s,%s,%s"%(x,y,l))
         self.target = Target(x,y,l)
 
 class Robot(object):
