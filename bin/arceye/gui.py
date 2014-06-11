@@ -125,6 +125,7 @@ class GuiBase(object):
 
     def display_header(self):
         self.guitxt.text("Frame: %s"%self.eye1.frame)
+        self.guitxt.text("")
 
     def display_eye(self, eye):
         self.guitxt.text("Eye %s"%eye.port)
@@ -168,5 +169,6 @@ class GuiBase(object):
             self.guitxt.unindent()
             self.guitxt.unindent()
         self.guitxt.color(0,255,0)
+        self.guitxt.text("")
         self.guitxt.text("Status %s"%eye.status)
         self.guitxt.text("Command %s"%eye.last_cmd)
