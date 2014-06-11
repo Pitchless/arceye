@@ -55,7 +55,6 @@ def joy_axis_command(j,axis):
 class Commander(GuiBase):
     def __init__(self, *args, **kw):
         super(Commander, self).__init__(*args, **kw)
-        self.show_help = False
 
     def init(self):
         super(Commander, self).init()
@@ -88,8 +87,6 @@ class Commander(GuiBase):
         elif keys[pygame.K_0]:
             for j in self.eye.all_joints():
                 j.target = 0
-        elif keys[pygame.K_F1]:
-            self.show_help = toggle(self.show_help)
         elif keys[pygame.K_a]:
             joint_ui_command(self.eye.yaw, 1)
         elif keys[pygame.K_d]:
@@ -123,78 +120,68 @@ class Commander(GuiBase):
         elif keys[pygame.K_3]:
             self.eye.lid.toggle_active()
 
+    def display_help(self):
+        self.guitxt.text("SPACE  - Zero commands and controllers.")
+        self.guitxt.text("a - yaw left")
+        self.guitxt.text("d - yaw right")
+        self.guitxt.text("w - pitch up")
+        self.guitxt.text("s - pitch down")
+        self.guitxt.text("1 - toggle yaw controller (PID)")
+        self.guitxt.text("2 - toggle pitch controller (PID)")
+        self.guitxt.text("3 - toggle lid controller (PID)")
+        self.guitxt.text("r,f - yaw brake on,off")
+        self.guitxt.text("t,g - pitch brake on,off")
+        self.guitxt.text("w,h - lid brake on,off")
+        self.guitxt.text("")
+        self.guitxt.text("Left Stick - yaw")
+        self.guitxt.text("Right Stick - pitch")
+        self.guitxt.text("Left Trigger - lid")
+
     def display(self):
         # Update the display
-        if self.show_help:
-            self.screen.fill((0,0,0))
-            self.guitxt.reset()
-            self.guitxt.color(255,255,0)
-            self.guitxt.text("**** Arcself.eye ***")
-            self.guitxt.text("")
-            self.guitxt.text("ESC - Quit")
-            self.guitxt.text("F1  - Show/hide this help")
-            self.guitxt.text("SPACE  - Zero commands and controllers.")
-            self.guitxt.text("a - yaw left")
-            self.guitxt.text("d - yaw right")
-            self.guitxt.text("w - pitch up")
-            self.guitxt.text("s - pitch down")
-            self.guitxt.text("1 - toggle yaw controller (PID)")
-            self.guitxt.text("2 - toggle pitch controller (PID)")
-            self.guitxt.text("3 - toggle lid controller (PID)")
-            self.guitxt.text("r,f - yaw brake on,off")
-            self.guitxt.text("t,g - pitch brake on,off")
-            self.guitxt.text("w,h - lid brake on,off")
-            self.guitxt.text("")
-            self.guitxt.text("Left Stick - yaw")
-            self.guitxt.text("Right Stick - pitch")
-            self.guitxt.text("Left Trigger - lid")
-        else:
-            self.screen.fill((0,0,0))
-            self.guitxt.reset()
-            self.guitxt.color(255,255,0)
-            self.guitxt.text("Frame: %s"%self.eye.frame)
-            self.guitxt.text("Connected: %s"%self.eye.is_connected)
-            if self.eye.bat_volt1 < 18: # over
-                self.guitxt.color(255,0,0)
-            if self.eye.bat_volt1 < 14: # normal
-                self.guitxt.color(0,255,0)
-            if self.eye.bat_volt1 < 11: # under
-                self.guitxt.color(255,123,0)
-            self.guitxt.text("Battery Volt 1: %s"%self.eye.bat_volt1)
-            if self.eye.bat_volt2 < 18: # over
-                self.guitxt.color(255,0,0)
-            if self.eye.bat_volt2 < 14: # normal
-                self.guitxt.color(0,255,0)
-            if self.eye.bat_volt2 < 11: # under
-                self.guitxt.color(255,123,0)
-            self.guitxt.text("Battery Volt 2: %s"%self.eye.bat_volt2)
-            self.guitxt.text("")
-            for j in self.eye.all_joints():
-                self.guitxt.color(255,255,0)
-                self.guitxt.text(j.name)
-                self.guitxt.color(0,255,0)
-                self.guitxt.indent()
-                if j.pos > j.pos_max or j.pos < j.pos_min:
-                    self.guitxt.color(255,0,0)
-                self.guitxt.text("Pos raw: " + str(j.pos_raw))
-                self.guitxt.text("Position: %s (%s..%s)"%(j.pos, j.pos_min, j.pos_max))
-                self.guitxt.color(0,255,0)
-                self.guitxt.text("Command: %s"%j.command)
-                self.guitxt.text("PWM: %s Dir:%s Reverse:%s"%(
-                    j.get_pwm(),j.get_direction(), j.reverse))
-                self.guitxt.text("Brake: %s"%j.brake_cmd)
-                self.guitxt.color(0,255,0) if j.active else self.guitxt.color(0,100,0)
-                self.guitxt.text("Active: %s"%j.active)
-                self.guitxt.indent()
-                self.guitxt.text("Target: %s"%j.target)
-                self.guitxt.text("Error: %s"%j.error)
-                self.guitxt.text("Deadzone: %s"%j.deadzone)
-                self.guitxt.text("P:%s I:%s D:%s"%(j.pid.Kp, j.pid.Ki, j.pid.Kd))
-                self.guitxt.unindent()
-                self.guitxt.unindent()
+        self.guitxt.text("Frame: %s"%self.eye.frame)
+        self.guitxt.text("Connected: %s"%self.eye.is_connected)
+        if self.eye.bat_volt1 < 18: # over
+            self.guitxt.color(255,0,0)
+        if self.eye.bat_volt1 < 14: # normal
             self.guitxt.color(0,255,0)
-            self.guitxt.text("Status %s"%self.eye.status)
-            self.guitxt.text("Command %s"%self.eye.last_cmd)
+        if self.eye.bat_volt1 < 11: # under
+            self.guitxt.color(255,123,0)
+        self.guitxt.text("Battery Volt 1: %s"%self.eye.bat_volt1)
+        if self.eye.bat_volt2 < 18: # over
+            self.guitxt.color(255,0,0)
+        if self.eye.bat_volt2 < 14: # normal
+            self.guitxt.color(0,255,0)
+        if self.eye.bat_volt2 < 11: # under
+            self.guitxt.color(255,123,0)
+        self.guitxt.text("Battery Volt 2: %s"%self.eye.bat_volt2)
+        self.guitxt.text("")
+        for j in self.eye.all_joints():
+            self.guitxt.color(255,255,0)
+            self.guitxt.text(j.name)
+            self.guitxt.color(0,255,0)
+            self.guitxt.indent()
+            if j.pos > j.pos_max or j.pos < j.pos_min:
+                self.guitxt.color(255,0,0)
+            self.guitxt.text("Pos raw: " + str(j.pos_raw))
+            self.guitxt.text("Position: %s (%s..%s)"%(j.pos, j.pos_min, j.pos_max))
+            self.guitxt.color(0,255,0)
+            self.guitxt.text("Command: %s"%j.command)
+            self.guitxt.text("PWM: %s Dir:%s Reverse:%s"%(
+                j.get_pwm(),j.get_direction(), j.reverse))
+            self.guitxt.text("Brake: %s"%j.brake_cmd)
+            self.guitxt.color(0,255,0) if j.active else self.guitxt.color(0,100,0)
+            self.guitxt.text("Active: %s"%j.active)
+            self.guitxt.indent()
+            self.guitxt.text("Target: %s"%j.target)
+            self.guitxt.text("Error: %s"%j.error)
+            self.guitxt.text("Deadzone: %s"%j.deadzone)
+            self.guitxt.text("P:%s I:%s D:%s"%(j.pid.Kp, j.pid.Ki, j.pid.Kd))
+            self.guitxt.unindent()
+            self.guitxt.unindent()
+        self.guitxt.color(0,255,0)
+        self.guitxt.text("Status %s"%self.eye.status)
+        self.guitxt.text("Command %s"%self.eye.last_cmd)
 
 gui = Commander(config_file=config_file)
 gui.init()

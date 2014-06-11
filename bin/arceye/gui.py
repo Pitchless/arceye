@@ -73,13 +73,29 @@ class GuiBase(object):
             keys = pygame.key.get_pressed()
             if keys[pygame.K_ESCAPE]:
                 self.done = True
+            elif keys[pygame.K_F1]:
+                self.show_help = toggle(self.show_help)
             else:
                 self.handle_keys_pressed(keys)
             # Update the eye and it's joints (runs their pids)
             self.eye.update()
             # Update the display
-            self.display()
+            self.screen.fill((0,0,0))
+            self.guitxt.reset()
+            self.guitxt.color(255,255,0)
+            if self.show_help:
+                self._display_help()
+            else:
+                self.display()
             pygame.display.flip()
+
+    def _display_help(self):
+        self.guitxt.text("**** Arcself.eye ***")
+        self.guitxt.text("")
+        self.guitxt.text("ESC - Quit")
+        self.guitxt.text("F1  - Show/hide this help")
+        self.guitxt.text("")
+        self.display_help()
 
     def handle_event(self, event):
         pass
