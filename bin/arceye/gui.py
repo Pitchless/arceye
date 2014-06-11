@@ -39,16 +39,23 @@ class GuiText(object):
 class GuiBase(object):
     def __init__(self, name = "ArcEye", w=320, h=620, config1=None, config2=None):
         self.config1   = config1
-        self.config2   = config1
+        self.config2   = config2
         self.name      = name
         self.frame     = 0
         self.w         = w
         self.h         = h
         self.done      = False
         self.show_help = False
-        self.eye1      = ArcEye(config_file=self.config1)
-        self.eye2      = ArcEye(config_file="arse")
         self.screen    = None
+        self.eye1      = None
+        self.eye2      = None
+        if self.config1:
+            self.eye1 = ArcEye(config_file=self.config1)
+        if self.config2:
+            self.eye2 = ArcEye(config_file=self.config2)
+            if self.eye1.port == self.eye2.port:
+                logerr("Eye2 on same port as eye1")
+                self.eye2 = None
 
     def init(self):
         # Start the gui
@@ -65,8 +72,10 @@ class GuiBase(object):
         while not self.done:
             self.frame += 1
             # Read eye status
-            self.eye1.read_status()
-            self.eye2.read_status()
+            if self.eye1:
+                self.eye1.read_status()
+            if self.eye2:
+                self.eye2.read_status()
             # Check for gui events
             for event in pygame.event.get(): # User did something
                 if event.type == pygame.QUIT: # If user clicked close
@@ -82,8 +91,10 @@ class GuiBase(object):
             else:
                 self.handle_keys_pressed(keys)
             # Update the eye and it's joints (runs their pids)
-            self.eye1.update()
-            self.eye2.update()
+            if self.eye1:
+                self.eye1.update()
+            if self.eye2:
+                self.eye2.update()
             # Update the display
             self.screen.fill((0,0,0))
             self.guitxt.reset()
