@@ -332,7 +332,7 @@ class ArcEye(object):
     def send_commands(self):
         if not self.is_connected: return
         cmd = ""
-        cmd = "%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(
+        cmd = "%s,%s,%s,%s,%s,%s,%s,%s,%s,\n"%(
             self.yaw.get_pwm(), self.yaw.get_direction(), self.yaw.get_brake_cmd(),
             self.pitch.get_pwm(), self.pitch.get_direction(), self.pitch.get_brake_cmd(),
             self.lid.get_pwm(), self.lid.get_direction(), self.lid.get_brake_cmd(),
