@@ -369,3 +369,7 @@ class ArcEye(object):
         if config.has_key('lid'):
             self.lid.update_config(config['lid'])
 
+    def stop(self):
+        for j in self.all_joints():
+            j.command = 0
+            j.active = False

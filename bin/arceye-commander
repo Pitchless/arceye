@@ -80,12 +80,11 @@ class Commander(GuiBase):
 
     def handle_keys_pressed(self, keys):
         if keys[pygame.K_SPACE]:
-            for j in self.eye1.all_joints():
-                j.command = 0
-                j.active = False
+            if self.eye1: self.eye1.stop()
+            if self.eye2: self.eye2.stop()
         elif keys[pygame.K_0]:
-            for j in self.eye1.all_joints():
-                j.target = 0
+            for j in self.eye1.all_joints(): j.target = 0
+            for j in self.eye2.all_joints(): j.target = 0
         elif keys[pygame.K_a]:
             joint_ui_command(self.eye1.yaw, 1)
         elif keys[pygame.K_d]:
