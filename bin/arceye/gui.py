@@ -2,6 +2,7 @@ from __future__ import print_function
 import sys, os, datetime
 import yaml
 from time import sleep
+from threading import Thread
 from arceye import *
 import pygame
 
@@ -71,7 +72,13 @@ class GuiBase(object):
         #loginfo("Fonts: %s"%pygame.font.get_fonts())
         self.guitxt.font("droidsansmono", 14)
 
-    def run(self):
+    def run(self, thread=False):
+        if not thread:
+            return self._run()
+        t = Thread(target=self._run)
+        return t.start()
+
+    def _run(self):
         while not self.done:
             self.frame += 1
             # Read eye status
