@@ -139,23 +139,6 @@ class Commander(GuiBase):
 
     def display(self):
         # Update the display
-        self.guitxt.text("Frame: %s"%self.eye.frame)
-        self.guitxt.text("Connected: %s"%self.eye.is_connected)
-        if self.eye.bat_volt1 < 18: # over
-            self.guitxt.color(255,0,0)
-        if self.eye.bat_volt1 < 14: # normal
-            self.guitxt.color(0,255,0)
-        if self.eye.bat_volt1 < 11: # under
-            self.guitxt.color(255,123,0)
-        self.guitxt.text("Battery Volt 1: %s"%self.eye.bat_volt1)
-        if self.eye.bat_volt2 < 18: # over
-            self.guitxt.color(255,0,0)
-        if self.eye.bat_volt2 < 14: # normal
-            self.guitxt.color(0,255,0)
-        if self.eye.bat_volt2 < 11: # under
-            self.guitxt.color(255,123,0)
-        self.guitxt.text("Battery Volt 2: %s"%self.eye.bat_volt2)
-        self.guitxt.text("")
         self.display_eye(self.eye)
         self.guitxt.color(0,255,0)
         self.guitxt.text("Status %s"%self.eye.status)

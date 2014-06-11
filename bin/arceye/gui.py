@@ -86,6 +86,7 @@ class GuiBase(object):
             if self.show_help:
                 self._display_help()
             else:
+                self.display_header()
                 self.display()
             pygame.display.flip()
 
@@ -105,6 +106,25 @@ class GuiBase(object):
 
     def display(self):
         pass
+
+    def display_header(self):
+        self.guitxt.text("Frame: %s"%self.eye.frame)
+        self.guitxt.text("Connected: %s"%self.eye.is_connected)
+        if self.eye.bat_volt1 < 18: # over
+            self.guitxt.color(255,0,0)
+        if self.eye.bat_volt1 < 14: # normal
+            self.guitxt.color(0,255,0)
+        if self.eye.bat_volt1 < 11: # under
+            self.guitxt.color(255,123,0)
+        self.guitxt.text("Battery Volt 1: %s"%self.eye.bat_volt1)
+        if self.eye.bat_volt2 < 18: # over
+            self.guitxt.color(255,0,0)
+        if self.eye.bat_volt2 < 14: # normal
+            self.guitxt.color(0,255,0)
+        if self.eye.bat_volt2 < 11: # under
+            self.guitxt.color(255,123,0)
+        self.guitxt.text("Battery Volt 2: %s"%self.eye.bat_volt2)
+        self.guitxt.text("")
 
     def display_eye(self, eye):
         for j in eye.all_joints():
