@@ -46,7 +46,7 @@ class GuiText(object):
 
 
 class GuiBase(object):
-    def __init__(self, name = "ArcEye", w=320, h=620, config1=None, config2=None):
+    def __init__(self, name = "ArcEye", w=640, h=640, config1=None, config2=None):
         self.config1   = config1
         self.config2   = config2
         self.eyes      = Robot(config1=config1, config2=config2)
