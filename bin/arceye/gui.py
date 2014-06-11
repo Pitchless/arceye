@@ -35,6 +35,15 @@ class GuiText(object):
     def font(self,name,size=12):
         self._font = pygame.font.Font(pygame.font.match_font(name), size)
 
+    def boolean(self, name, value, col_true=(0,255,0), col_false=(255,0,0)):
+        old_col = self.text_color
+        if col_true:
+            self.text_color = col_true
+        if not value:
+            self.text_color = col_false
+        self.text("%s: %s"%(name, value))
+        self.text_color = old_col
+
 
 class GuiBase(object):
     def __init__(self, name = "ArcEye", w=320, h=620, config1=None, config2=None):
@@ -129,7 +138,7 @@ class GuiBase(object):
 
     def display_eye(self, eye):
         self.guitxt.text("Eye %s"%eye.port)
-        self.guitxt.text("Connected: %s"%eye.is_connected)
+        self.guitxt.boolean("Connected", eye.is_connected)
         if eye.bat_volt1 < 18: # over
             self.guitxt.color(255,0,0)
         if eye.bat_volt1 < 14: # normal

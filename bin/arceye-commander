@@ -178,7 +178,7 @@ class Commander(GuiBase):
         if self.eye1:
             self.display_eye(self.eye1)
         if self.eye2:
-            self.guitxt.y = 25
+            self.guitxt.y = 40
             self.guitxt.x = 300
             self.display_eye(self.eye2)
             self.guitxt.x = 10
