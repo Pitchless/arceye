@@ -64,6 +64,11 @@ while not gui.eyes.eye1.is_connected:
     sleep(1)
 gui.eyes.eye1.activate()
 
+loginfo("Going to zero...")    
+gui.eyes.eye1.go_to(0.0, 0.0)
+sleep(10)
+
+loginfo("Looping...")
 while not gui.done:
     loginfo("Hello")
     
@@ -72,19 +77,47 @@ while not gui.done:
     gui.eyes.eye1.go_to(0.0, 0.0)
     sleep(5)
 
-    #gui.eyes.eye1.go_to(0.5, 0.0)
-    #sleep(3)
-    #gui.eyes.eye1.go_to(0.9, 0.0)
-    #sleep(3)
-
-    #gui.eyes.eye1.go_to(0.5, 0.0)
-    #sleep(3)
-    #gui.eyes.eye1.go_to(0.0, 0.0)
-    #sleep(3)
-
     gui.eyes.eye1.go_to(-0.9, 0.0)
     sleep(5)
     gui.eyes.eye1.go_to(0.0, 0.0)
     sleep(5)
 
-gui.eyes.eye1.deactivate()
+    gui.eyes.eye1.go_to(0.0, 0.8)
+    sleep(5)
+    gui.eyes.eye1.go_to(0.0, 0.0)
+    sleep(5)
+    
+    gui.eyes.eye1.go_to(0.0, -0.8)
+    sleep(5)
+    gui.eyes.eye1.go_to(0.0, 0.0)
+    sleep(5)
+    
+    # Diagonals
+    gui.eyes.eye1.go_to(0.9, 0.8)
+    sleep(5)
+    gui.eyes.eye1.go_to(0.0, 0.0)
+    sleep(5)
+    gui.eyes.eye1.go_to(0.9, -0.8)
+    sleep(5)
+    gui.eyes.eye1.go_to(0.0, 0.0)
+    sleep(5)
+
+    gui.eyes.eye1.go_to(-0.9, 0.8)
+    sleep(5)
+    gui.eyes.eye1.go_to(0.0, 0.0)
+    sleep(5)
+    gui.eyes.eye1.go_to(-0.9, -0.8)
+    sleep(5)
+    gui.eyes.eye1.go_to(0.0, 0.0)
+    sleep(5)
+    
+    gui.eyes.eye1.go_to(l=0.6)
+    sleep(5)
+    gui.eyes.eye1.go_to(l=0.2)
+    sleep(4)
+    gui.eyes.eye1.go_to(l=0.1)
+    sleep(2)
+    gui.eyes.eye1.go_to(l=0.0)
+    sleep(4)
+
+gui.eyes.eye3.deactivate()
