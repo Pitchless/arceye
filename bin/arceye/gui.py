@@ -37,10 +37,12 @@ class GuiText(object):
 
 
 class GuiBase(object):
-    def __init__(self, name = "ArcEye", config_file=None):
+    def __init__(self, name = "ArcEye", w=320, h=620, config_file=None):
         self.config_file = config_file
         self.name        = name
         self.frame       = 0
+        self.w           = w
+        self.h           = h
         self.done        = False
         self.show_help   = False
         self.eye         = ArcEye()
@@ -51,7 +53,7 @@ class GuiBase(object):
         loginfo("GUI Init - %s"%self.name)
         pygame.init()
         pygame.display.set_caption(self.name)
-        self.screen = pygame.display.set_mode( (320,620) )
+        self.screen = pygame.display.set_mode( (self.w,self.h) )
         self.screen.fill((0, 0, 0))
         self.guitxt = GuiText(self.screen)
         #loginfo("Fonts: %s"%pygame.font.get_fonts())
