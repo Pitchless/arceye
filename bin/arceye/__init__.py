@@ -157,13 +157,19 @@ class Joint(object):
     def toggle_active(self):
         """Turn the PID loop control on and off."""
         if self.active:
-            self.active = False
-            self.command = 0
-            self.target = 0
+            self.activate()
         else:
-            self.active = True
-            self.target = self.pos
+            self.deactivate()
         return self.active
+
+    def activate(self):
+        self.active = True
+        self.target = self.pos
+
+    def deactivate(self):
+        self.active = False
+        self.command = 0
+        self.target = 0
 
     def in_deadzone(self):
         if abs(self.error) < self.deadzone:
@@ -229,6 +235,12 @@ class Joint(object):
             self.pid.setKd(config['d'])
 
 
+class Target(object):
+    def __init__(self, x, y, l):
+        self.x = x
+        self.y = y
+        self.l = l
+
 class ArcEye(object):
     """
     Object representing a complete eye, which it connects to over the serial
@@ -257,6 +269,7 @@ class ArcEye(object):
            self.load_config(config_file)
 
         self.frame = 0
+        self.target = None
 
     def all_joints(self):
         return (self.yaw, self.pitch, self.lid)
@@ -369,10 +382,21 @@ class ArcEye(object):
         if config.has_key('lid'):
             self.lid.update_config(config['lid'])
 
+    def activate(self):
+        for j in self.all_joints():
+            j.activate()
+
+    def deactivate(self):
+        for j in self.all_joints():
+            j.deactivate()
+
     def stop(self):
         for j in self.all_joints():
             j.command = 0
             j.active = False
+
+    def go_to(self, x=None, y=None, l=None):
+        self.target = Target(x,y,l)
 
 class Robot(object):
     """The complete robot, with both eyes."""
