@@ -98,19 +98,23 @@ class Commander(GuiBase):
             joint_ui_command(self.eye1.lid, 1)
         elif keys[pygame.K_q]:
             joint_ui_command(self.eye1.lid, -1)
+
         # Brakes
-        elif keys[pygame.K_r]:
-            self.eye1.yaw.brake_cmd = 1
-        elif keys[pygame.K_f]:
+        elif keys[pygame.K_LSHIFT] and keys[pygame.K_z]:
             self.eye1.yaw.brake_cmd = 0
-        elif keys[pygame.K_t]:
-            self.eye1.pitch.brake_cmd = 1
-        elif keys[pygame.K_g]:
+        elif keys[pygame.K_z]:
+            self.eye1.yaw.brake_cmd = 1
+
+        elif keys[pygame.K_LSHIFT] and keys[pygame.K_x]:
             self.eye1.pitch.brake_cmd = 0
-        elif keys[pygame.K_y]:
-            self.eye1.lid.brake_cmd = 1
-        elif keys[pygame.K_h]:
+        elif keys[pygame.K_x]:
+            self.eye1.pitch.brake_cmd = 1
+
+        elif keys[pygame.K_LSHIFT] and keys[pygame.K_c]:
             self.eye1.lid.brake_cmd = 0
+        elif keys[pygame.K_c]:
+            self.eye1.lid.brake_cmd = 1
+
         # Controllers on/off
         elif keys[pygame.K_1]:
             self.eye1.yaw.toggle_active()
@@ -118,6 +122,12 @@ class Commander(GuiBase):
             self.eye1.pitch.toggle_active()
         elif keys[pygame.K_3]:
             self.eye1.lid.toggle_active()
+        elif keys[pygame.K_4]:
+            self.eye2.yaw.toggle_active()
+        elif keys[pygame.K_5]:
+            self.eye2.pitch.toggle_active()
+        elif keys[pygame.K_6]:
+            self.eye2.lid.toggle_active()
 
     def display_help(self):
         self.guitxt.text("SPACE  - Zero commands and controllers.")
