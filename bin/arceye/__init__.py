@@ -373,3 +373,31 @@ class ArcEye(object):
         for j in self.all_joints():
             j.command = 0
             j.active = False
+
+class Robot(object):
+    """The complete robot, with both eyes."""
+    def __init__(self, config1=None, config2=None):
+        self.config1   = config1
+        self.config2   = config2
+        self.eye1      = None
+        self.eye2      = None
+        if self.config1:
+            self.eye1 = ArcEye(config_file=self.config1)
+        if self.config2:
+            self.eye2 = ArcEye(config_file=self.config2)
+            if self.eye1.port == self.eye2.port:
+                logerr("Eye2 on same port as eye1")
+                self.eye2 = None
+
+    def read_status(self):
+        if self.eye1:
+            self.eye1.read_status()
+        if self.eye2:
+            self.eye2.read_status()
+
+    def update(self):
+        if self.eye1:
+            self.eye1.update()
+        if self.eye2:
+            self.eye2.update()
+
