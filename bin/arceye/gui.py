@@ -106,3 +106,27 @@ class GuiBase(object):
     def display(self):
         pass
 
+    def display_eye(self, eye):
+        for j in eye.all_joints():
+            self.guitxt.color(255,255,0)
+            self.guitxt.text(j.name)
+            self.guitxt.color(0,255,0)
+            self.guitxt.indent()
+            if j.pos > j.pos_max or j.pos < j.pos_min:
+                self.guitxt.color(255,0,0)
+            self.guitxt.text("Pos raw: " + str(j.pos_raw))
+            self.guitxt.text("Position: %s (%s..%s)"%(j.pos, j.pos_min, j.pos_max))
+            self.guitxt.color(0,255,0)
+            self.guitxt.text("Command: %s"%j.command)
+            self.guitxt.text("PWM: %s Dir:%s Reverse:%s"%(
+                j.get_pwm(),j.get_direction(), j.reverse))
+            self.guitxt.text("Brake: %s"%j.brake_cmd)
+            self.guitxt.color(0,255,0) if j.active else self.guitxt.color(0,100,0)
+            self.guitxt.text("Active: %s"%j.active)
+            self.guitxt.indent()
+            self.guitxt.text("Target: %s"%j.target)
+            self.guitxt.text("Error: %s"%j.error)
+            self.guitxt.text("Deadzone: %s"%j.deadzone)
+            self.guitxt.text("P:%s I:%s D:%s"%(j.pid.Kp, j.pid.Ki, j.pid.Kd))
+            self.guitxt.unindent()
+            self.guitxt.unindent()
