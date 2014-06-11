@@ -1,13 +1,8 @@
 port: /dev/ttyUSB0
 # 1 same as status from arduino (glitchy!). 4 = every 4 statuses etc
 command_rate: 1
-
 # Joystick deadzone
 dead_zone: 0.1
-# Used to scale the joystick axis
-max_pwm_yaw: 50
-max_pwm_pitch: 50
-max_pwm_lid: 120
 # The joints
 yaw:
     #pwm_limit: 50 #12v
