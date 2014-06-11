@@ -19,13 +19,6 @@ if config.has_key('dead_zone'): dead_zone = config['dead_zone']
 yaw_axis=0
 pitch_axis=1
 lid_axis=4
-# Used to scale the joystick axis in command mode
-max_pwm_yaw = 50
-max_pwm_pitch = 50
-max_pwm_lid = 120
-if config.has_key('max_pwm_yaw'): max_pwm_yaw = config['max_pwm_yaw']
-if config.has_key('max_pwm_pitch'): max_pwm_pitch = config['max_pwm_pitch']
-if config.has_key('max_pwm_lid'): max_pwm_lid = config['max_pwm_lid']
 
 # Util func to clamp a value in a deadzone
 def dead_zoned(val, dead_zone=dead_zone):
@@ -41,15 +34,15 @@ def joint_ui_command(joint,val):
         joint.command += val
 
 def joy_axis_command(j,axis):
-    if not axis == 0:
-        axis = ( axis - (dead_zone*axis/abs(axis)) )/dead_zone
+    #if not axis == 0:
+    #    axis = ( axis - (dead_zone*axis/abs(axis)) )/dead_zone
     if j.active: # pid is running
         if axis >= 0:
             j.target = axis * abs(j.pos_max)
         else:
             j.target = axis * abs(j.pos_min)
     else:
-        j.command = axis * max_pwm_yaw
+        j.command = axis * j.pwm_limit
 
 # Setup the eye
 class Commander(GuiBase):
