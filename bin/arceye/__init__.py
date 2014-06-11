@@ -15,6 +15,15 @@ def logerr(*msg):
     print("[%s] ERROR:"%datetime.datetime.now(), *msg, file=sys.stderr)
 
 
+#
+# Util
+#
+def toggle(value):
+    if value:
+        return False
+    return True
+
+
 # The recipe gives simple implementation of a Discrete
 # Proportional-Integral-Derivative (PID) controller. PID controller gives output
 # value for error between desired reference input and measurement feedback to
