@@ -62,10 +62,23 @@ gui.run(thread=True)
 while not gui.eyes.eye1.is_connected:
     loginfo("Waiting for eye1")
     sleep(1)
+
+while not gui.eyes.eye1.is_connected:
+    loginfo("Waiting for eye2")
+    sleep(1)
+
+loginfo("Gentlemen start your engines...")
+i = 23
+while i > 0:
+    loginfo(str(i))
+    sleep(1)
+    i -= 1
+loginfo("GO")
 gui.eyes.eye1.activate()
+gui.eyes.eye2.activate()
 
 loginfo("Going to zero...")    
-gui.eyes.eye1.go_to(0.0, 0.0)
+gui.eyes.go_to(0.0, 0.0)
 sleep(10)
 
 loginfo("Looping...")
@@ -73,110 +86,110 @@ while not gui.done:
     loginfo("Hello")
     
     #lids - much smoother return on both eyes
-    gui.eyes.eye1.go_to(l=0.7)
+    gui.eyes.go_to(l=0.7)
     sleep(2)
-    gui.eyes.eye1.go_to(l=0.9)
+    gui.eyes.go_to(l=0.9)
     sleep(5)
-    gui.eyes.eye1.go_to(l=0.4)
+    gui.eyes.go_to(l=0.4)
     sleep(2)
-    gui.eyes.eye1.go_to(l=0.2)
+    gui.eyes.go_to(l=0.2)
     sleep(1)
-    gui.eyes.eye1.go_to(l=0.0)
+    gui.eyes.go_to(l=0.0)
     sleep(2)
 
 
-    gui.eyes.eye1.go_to(0.8, 0.0) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.8, 0.0) #(-left +right, -up, +down) from front
     sleep(2)
-    gui.eyes.eye1.go_to(0.6, 0.0) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.6, 0.0) #(-left +right, -up, +down) from front
     sleep(2)
-    gui.eyes.eye1.go_to(0.2, 0.0) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.2, 0.0) #(-left +right, -up, +down) from front
     sleep(2)
-    gui.eyes.eye1.go_to(-0.2, 0.0) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(-0.2, 0.0) #(-left +right, -up, +down) from front
     sleep(2)
-    gui.eyes.eye1.go_to(-0.6, 0.0) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(-0.6, 0.0) #(-left +right, -up, +down) from front
     sleep(2)
-    gui.eyes.eye1.go_to(-0.8, 0.0) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(-0.8, 0.0) #(-left +right, -up, +down) from front
     sleep(4)
-    gui.eyes.eye1.go_to(-0.6, -0.2) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(-0.6, -0.2) #(-left +right, -up, +down) from front
     sleep(2)
-    gui.eyes.eye1.go_to(0.8, 0.8) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.8, 0.8) #(-left +right, -up, +down) from front
     sleep(1)
-    gui.eyes.eye1.go_to(0.8, 0.6) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.8, 0.6) #(-left +right, -up, +down) from front
     sleep(5)
-    gui.eyes.eye1.go_to(0.2, -0.8) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.2, -0.8) #(-left +right, -up, +down) from front
     sleep(3)
-    gui.eyes.eye1.go_to(0.6, -0.8) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.6, -0.8) #(-left +right, -up, +down) from front
     sleep(2)
-    gui.eyes.eye1.go_to(0.8, -0.6) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.8, -0.6) #(-left +right, -up, +down) from front
     sleep(4)
-    gui.eyes.eye1.go_to(0.0, 0.0) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.0, 0.0) #(-left +right, -up, +down) from front
     sleep(3)
 
     #lids - much smoother return on both eyes
-    gui.eyes.eye1.go_to(l=0.7)
+    gui.eyes.go_to(l=0.7)
     sleep(2)
-    gui.eyes.eye1.go_to(l=0.9)
+    gui.eyes.go_to(l=0.9)
     sleep(1)
-    gui.eyes.eye1.go_to(l=0.4)
+    gui.eyes.go_to(l=0.4)
     sleep(2)
-    gui.eyes.eye1.go_to(l=0.2)
+    gui.eyes.go_to(l=0.2)
     sleep(1)
-    gui.eyes.eye1.go_to(l=0.0)
+    gui.eyes.go_to(l=0.0)
     sleep(5)
 
 
-    gui.eyes.eye1.go_to(0.4, 0.4) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.4, 0.4) #(-left +right, -up, +down) from front
     sleep(1)
-    gui.eyes.eye1.go_to(0.8, 0.8) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.8, 0.8) #(-left +right, -up, +down) from front
     sleep(3)
-    gui.eyes.eye1.go_to(0.8, -0.8) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.8, -0.8) #(-left +right, -up, +down) from front
     sleep(3)
-    gui.eyes.eye1.go_to(0.0, 0.8) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.0, 0.8) #(-left +right, -up, +down) from front
     sleep(4)
-    gui.eyes.eye1.go_to(0.0, 0.0) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.0, 0.0) #(-left +right, -up, +down) from front
     sleep(3)
-    gui.eyes.eye1.go_to(0.4, 0.0) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.4, 0.0) #(-left +right, -up, +down) from front
     sleep(4)
-    gui.eyes.eye1.go_to(0.6, 0.0) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.6, 0.0) #(-left +right, -up, +down) from front
     sleep(3)
-    gui.eyes.eye1.go_to(0.8, 0.0) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.8, 0.0) #(-left +right, -up, +down) from front
      
     #lids - much smoother return on both eyes
-    gui.eyes.eye1.go_to(l=0.7)
+    gui.eyes.go_to(l=0.7)
     sleep(2)
-    gui.eyes.eye1.go_to(l=0.9)
+    gui.eyes.go_to(l=0.9)
     sleep(1)
-    gui.eyes.eye1.go_to(l=0.4)
+    gui.eyes.go_to(l=0.4)
     sleep(2)
-    gui.eyes.eye1.go_to(l=0.2)
+    gui.eyes.go_to(l=0.2)
     sleep(1)
-    gui.eyes.eye1.go_to(l=0.0)
+    gui.eyes.go_to(l=0.0)
     sleep(5)
 
     #lids - much smoother return on both eyes
-    gui.eyes.eye1.go_to(l=0.7)
+    gui.eyes.go_to(l=0.7)
     sleep(2)
-    gui.eyes.eye1.go_to(l=0.9)
+    gui.eyes.go_to(l=0.9)
     sleep(1)
-    gui.eyes.eye1.go_to(l=0.4)
+    gui.eyes.go_to(l=0.4)
     sleep(2)
-    gui.eyes.eye1.go_to(l=0.2)
+    gui.eyes.go_to(l=0.2)
     sleep(1)
-    gui.eyes.eye1.go_to(l=0.0)
+    gui.eyes.go_to(l=0.0)
     sleep(2)
 
 
-    gui.eyes.eye1.go_to(-0.4, 0.0) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(-0.4, 0.0) #(-left +right, -up, +down) from front
     sleep(2)
-    gui.eyes.eye1.go_to(-0.6, 0.0) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(-0.6, 0.0) #(-left +right, -up, +down) from front
     sleep(1)
-    gui.eyes.eye1.go_to(-0.8, 0.0) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(-0.8, 0.0) #(-left +right, -up, +down) from front
     sleep(3)
-    gui.eyes.eye1.go_to(-0.2, -0.6) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(-0.2, -0.6) #(-left +right, -up, +down) from front
     sleep(4)
-    gui.eyes.eye1.go_to(0.2, -0.6) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.2, -0.6) #(-left +right, -up, +down) from front
     sleep(1)
-    gui.eyes.eye1.go_to(0.0, 0.0) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(0.0, 0.0) #(-left +right, -up, +down) from front
     sleep(2)
 
 

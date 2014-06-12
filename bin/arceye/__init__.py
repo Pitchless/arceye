@@ -304,9 +304,9 @@ class ArcEye(object):
         self.is_connected = False
         self._retry_connect_count = self.retry_connect_timeout
         self.ser = Serial(self.port, 115200)
-        self.is_connected = True
         sleep(3) # wait for the board to reset
         loginfo("Connected to %s"%self.port)
+        self.is_connected = True
         return True
 
     def read_status(self):
@@ -490,3 +490,10 @@ class Robot(object):
         if self.eye2:
             for j in self.eye2.all_joints(): j.target = 0
 
+    def go_to(self, x=None, y=None, l=None):
+        self.target = Target(x,y,l)
+        if self.eye1:
+            self.eye1.go_to(x,y,l)
+        if self.eye2:
+            self.eye2.go_to(x,y,l)
+            
