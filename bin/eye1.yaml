@@ -1,0 +1,38 @@
+port: /dev/ttyUSB0
+# 1 same as status from arduino (glitchy!). 4 = every 4 statuses etc
+command_rate: 1
+
+# Joystick deadzone
+dead_zone: 0.1
+# Used to scale the joystick axis
+max_pwm_yaw: 50
+max_pwm_pitch: 50
+max_pwm_lid: 120
+# The joints
+yaw:
+    pwm_limit: 100 #24v
+    pos_center_raw: 568
+    pos_max: 227 # scaled
+    pos_min: -127 # scaled
+    p: 0.3
+    i: 0.01
+    d: 1
+pitch:
+    pwm_limit: 120 #was 100 with p0.25 #24v
+    pos_center_raw: 336
+    pos_max: 373
+    pos_min: -188
+    deadzone: 0
+    p: 0.15 #was 0.25
+    i: 0.01
+    d: 0.2
+lid:
+    pwm_limit: 150 #was 120 with P at2.2
+    pos_center_raw: 371
+    pos_max: 209
+    pos_min: 0
+    reverse: true
+    deadzone: 0
+    p: 1.1 #was 0.95 # 1.5 # was 2.2 #2 was 4 
+    i: 0.001
+    d: 2 #was 0.001                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         #10 was good on monday now jittery
