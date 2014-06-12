@@ -81,6 +81,20 @@ loginfo("Going to zero...")
 gui.eyes.go_to(0.0, 0.0)
 sleep(10)
 
+def wink():
+    #lids - much smoother return on both eyes
+    eye = gui.eyes.eye1
+    eye.go_to(l=0.7)
+    sleep(2)
+    eye.go_to(l=0.9)
+    sleep(5)
+    eye.go_to(l=0.4)
+    sleep(2)
+    eye.go_to(l=0.2)
+    sleep(1)
+    eye.go_to(l=0.0)
+    sleep(2)
+
 loginfo("Looping...")
 while not gui.done:
     loginfo("Hello")
@@ -97,6 +111,7 @@ while not gui.done:
     gui.eyes.go_to(l=0.0)
     sleep(2)
 
+    wink()
 
     gui.eyes.go_to(0.8, 0.0) #(-left +right, -up, +down) from front
     sleep(2)
