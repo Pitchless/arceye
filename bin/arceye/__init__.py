@@ -3,6 +3,7 @@ import sys, os, datetime
 import yaml
 from serial import Serial, SerialException
 from time import sleep
+from threading import Thread
 
 #
 # Logging util
@@ -432,6 +433,15 @@ class ArcEye(object):
         loginfo("Goto %s,%s,%s"%(x,y,l))
         self.target = Target(x,y,l)
 
+    def run(self):
+        t = Thread(target=self._run)
+        return t.start()
+
+    def _run(self):
+        while True:
+            self.read_status()
+            self.update()
+
 class Robot(object):
     """The complete robot, with both eyes."""
     def __init__(self, config1=None, config2=None):
@@ -458,6 +468,17 @@ class Robot(object):
             self.eye1.update()
         if self.eye2:
             self.eye2.update()
+
+    def run(self, thread=False):
+        if not thread:
+            return self._run()
+        t = Thread(target=self._run)
+        return t.start()
+
+    def _run(self):
+        while True:
+            self.read_status()
+            self.send_commands()
 
     def stop(self):
         if self.eye1: self.eye1.stop()

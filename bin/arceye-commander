@@ -183,4 +183,4 @@ class Commander(GuiBase):
 
 gui = Commander(config1=config_file, config2=config_file_2)
 gui.init()
-gui.run()
+gui.run(thread=True)

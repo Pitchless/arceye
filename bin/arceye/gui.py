@@ -60,6 +60,7 @@ class GuiBase(object):
         self.done      = False
         self.show_help = False
         self.screen    = None
+        self.is_threaded = False
 
     def init(self):
         # Start the gui
@@ -73,8 +74,13 @@ class GuiBase(object):
         self.guitxt.font("droidsansmono", 14)
 
     def run(self, thread=False):
+        self.is_threaded = thread
         if not thread:
             return self._run()
+        if self.eyes.eye1:
+            self.eyes.eye1.run()
+        if self.eyes.eye2:
+            self.eyes.eye2.run()
         t = Thread(target=self._run)
         return t.start()
 
@@ -82,7 +88,8 @@ class GuiBase(object):
         while not self.done:
             self.frame += 1
             # Read eye status
-            self.eyes.read_status()
+            if not self.is_threaded:
+                self.eyes.read_status()
             # Check for gui events
             for event in pygame.event.get(): # User did something
                 if event.type == pygame.QUIT: # If user clicked close
@@ -98,7 +105,8 @@ class GuiBase(object):
             else:
                 self.handle_keys_pressed(keys)
             # Update the eye and it's joints (runs their pids)
-            self.eyes.update()
+            if not self.is_threaded:
+                self.eyes.update()
             # Update the display
             self.screen.fill((0,0,0))
             self.guitxt.reset()
