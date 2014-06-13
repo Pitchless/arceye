@@ -1,0 +1,45 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+from arceye import *
+from arceye.gui import *
+
+class ArcEyePuppet(GuiDemo):
+    def __init__(self, *args, **kw):
+        super(ArcEyePuppet, self).__init__(*args, **kw)
+        self._wink_thread = None
+
+    def handle_event(self, event):
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_w:
+                self.wink()
+
+    def wink(self):
+        loginfo("Hello")
+        if self._wink_thread is not None and self._wink_thread.is_alive():
+            return False
+        self._wink_thread = Thread(target=self._wink)
+        self.daemon = True
+        return self._wink_thread.start()
+
+    def _wink(self):
+        loginfo("Wink")
+        eye = self.eyes.eye1
+        eye.go_to(l=0.7)
+        sleep(2)
+        eye.go_to(l=0.9)
+        sleep(5)
+        eye.go_to(l=0.4)
+        sleep(2)
+        eye.go_to(l=0.2)
+        sleep(1)
+        eye.go_to(l=0.0)
+        sleep(2)
+        loginfo("Done")
+
+demo = ArcEyePuppet()
+demo.init()
+demo.start()
+
+demo.eyes.eye1.deactivate()
+demo.eyes.eye2.deactivate()
