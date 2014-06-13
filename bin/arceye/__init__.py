@@ -251,6 +251,9 @@ class Target(object):
         self.y = y
         self.l = l
 
+    def __repr__(self):
+        return "Target x:%s y:%s l:%s"%(self.x, self.y, self.l)
+
 class ArcEye(object):
     """
     Object representing a complete eye, which it connects to over the serial

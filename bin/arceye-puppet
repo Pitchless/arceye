@@ -4,18 +4,42 @@ from __future__ import print_function
 from arceye import *
 from arceye.gui import *
 
+def clamp(val, minv=-1.0, maxv=1.0):
+    if val > maxv: return maxv
+    if val < minv: return minv
+    return val
+
 class ArcEyePuppet(GuiDemo):
     def __init__(self, *args, **kw):
         super(ArcEyePuppet, self).__init__(*args, **kw)
         self._wink_thread = None
         self.target = Target(0,0,0)
 
+    def init(self):
+        super(ArcEyePuppet, self).init()
+        pygame.key.set_repeat(20,20)
+
     def handle_event(self, event):
-        if event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYUP:
             if event.key == pygame.K_w:
                 self.wink()
+        if event.type == pygame.KEYDOWN:
+            new_target = False
             if event.key == pygame.K_UP:
-                loginfo("UP!")
+                self.target.y = clamp(self.target.y + 0.01)
+                new_target = True
+            if event.key == pygame.K_DOWN:
+                self.target.y = clamp(self.target.y - 0.01)
+                new_target = True
+            if event.key == pygame.K_RIGHT:
+                self.target.x = clamp(self.target.x + 0.01)
+                new_target = True
+            if event.key == pygame.K_LEFT:
+                self.target.x = clamp(self.target.x - 0.01)
+                new_target = True
+
+            if new_target:
+                self.eyes.go_to(self.target.x, self.target.y)
 
     def wink(self):
         loginfo("Hello")
@@ -43,6 +67,3 @@ class ArcEyePuppet(GuiDemo):
 demo = ArcEyePuppet()
 demo.init()
 demo.start()
-
-demo.eyes.eye1.deactivate()
-demo.eyes.eye2.deactivate()
