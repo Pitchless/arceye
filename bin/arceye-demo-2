@@ -16,48 +16,9 @@ config_file_2 = None
 if len(sys.argv) > 2:
     config_file_2 = sys.argv[2]
 
-class Demo1(GuiBase):
-    def init(self):
-        super(Demo1, self).init()
-        self.name = "ArcEye Demo 1"
-
-    def handle_keys_pressed(self, keys):
-        # Stop!
-        if keys[pygame.K_SPACE]:
-            self.eyes.deactivate()
-        elif keys[pygame.K_0]:
-            self.eyes.zero_target()
-
-        # Controllers on/off
-        elif keys[pygame.K_1]:
-            self.eye1.yaw.toggle_active()
-        elif keys[pygame.K_2]:
-            self.eye1.pitch.toggle_active()
-        elif keys[pygame.K_3]:
-            self.eye1.lid.toggle_active()
-        elif keys[pygame.K_4]:
-            self.eye2.yaw.toggle_active()
-        elif keys[pygame.K_5]:
-            self.eye2.pitch.toggle_active()
-        elif keys[pygame.K_6]:
-            self.eye2.lid.toggle_active()
-
-    def display_help(self):
-        self.guitxt.text("TODO")
-
-    def display(self):
-        # Update the display
-        if self.eye1:
-            self.display_eye(self.eye1)
-        if self.eye2:
-            self.guitxt.y = 40
-            self.guitxt.x = 300
-            self.display_eye(self.eye2)
-            self.guitxt.x = 10
-
-gui = Demo1(config1=config_file, config2=config_file_2)
+gui = GuiDemo(config1=config_file, config2=config_file_2)
 gui.init()
-gui.run(thread=True)
+gui.start()
 
 while not gui.eyes.eye1.is_connected:
     loginfo("Waiting for eye1")

@@ -83,8 +83,8 @@ class GuiBase(object):
             self.eyes.eye1.run()
         if self.eyes.eye2:
             self.eyes.eye2.run()
-        self.thread = Thread(target=self._run)
-        return t.start()
+        self.thread = Thread(target=self.run)
+        return self.thread.start()
 
     def run(self):
         """Run the GUI, blocks until self.done is True."""
@@ -134,7 +134,7 @@ class GuiBase(object):
         pass
 
     def display_header(self):
-        self.guitxt.text("ArcEye Frame:%s"%self.frame)
+        self.guitxt.text("ArcEye (%s) Frame:%s"%(sys.argv[0], self.frame))
         self.guitxt.text("")
 
     def display_eye(self, eye):
@@ -184,3 +184,42 @@ class GuiBase(object):
         self.guitxt.text("")
         self.guitxt.text("Status %s"%eye.status)
         self.guitxt.text("Command %s"%eye.last_cmd)
+
+class GuiDemo(GuiBase):
+    def init(self):
+        super(GuiDemo, self).init()
+        self.name = "ArcEye Demo"
+
+    def handle_keys_pressed(self, keys):
+        # Stop!
+        if keys[pygame.K_SPACE]:
+            self.eyes.deactivate()
+        elif keys[pygame.K_0]:
+            self.eyes.zero_target()
+
+        # Controllers on/off
+        elif keys[pygame.K_1]:
+            self.eye1.yaw.toggle_active()
+        elif keys[pygame.K_2]:
+            self.eye1.pitch.toggle_active()
+        elif keys[pygame.K_3]:
+            self.eye1.lid.toggle_active()
+        elif keys[pygame.K_4]:
+            self.eye2.yaw.toggle_active()
+        elif keys[pygame.K_5]:
+            self.eye2.pitch.toggle_active()
+        elif keys[pygame.K_6]:
+            self.eye2.lid.toggle_active()
+
+    def display_help(self):
+        self.guitxt.text("TODO")
+
+    def display(self):
+        # Update the display
+        if self.eye1:
+            self.display_eye(self.eye1)
+        if self.eye2:
+            self.guitxt.y = 40
+            self.guitxt.x = 300
+            self.display_eye(self.eye2)
+            self.guitxt.x = 10
