@@ -12,7 +12,9 @@ def clamp(val, minv=-1.0, maxv=1.0):
 class ArcEyePuppet(GuiDemo):
     def __init__(self, *args, **kw):
         super(ArcEyePuppet, self).__init__(*args, **kw)
-        self._wink_thread = None
+        self._wink1_thread = None
+        self._wink2_thread = None
+        self._blink_thread = None
         self.target = Target(0,0,None)
 
     def init(self):
@@ -23,6 +25,10 @@ class ArcEyePuppet(GuiDemo):
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_w:
                 self.wink()
+            elif event.key == pygame.K_e:
+                self.wink2()
+            elif event.key == pygame.K_b:
+                self.blink()
         if event.type == pygame.KEYDOWN:
             new_target = False
             if event.key == pygame.K_UP:
@@ -42,20 +48,30 @@ class ArcEyePuppet(GuiDemo):
                 self.eyes.go_to(self.target.x, self.target.y)
 
     def wink(self):
-        loginfo("Hello")
-        if self._wink_thread is not None and self._wink_thread.is_alive():
-            return False
-        self._wink_thread = Thread(target=self._wink)
-        self.daemon = True
-        return self._wink_thread.start()
+        return self.wink1()
 
-    def _wink(self):
+    def wink1(self):
+        if self._wink1_thread is not None and self._wink1_thread.is_alive():
+            return False
+        self._wink1_thread = Thread(target=self._wink1)
+        return self._wink1_thread.start()
+    
+    def wink2(self):
+        if self._wink2_thread is not None and self._wink2_thread.is_alive():
+            return False
+        self._wink2_thread = Thread(target=self._wink2)
+        return self._wink2_thread.start()
+
+    def _wink1(self): return self._wink(self.eyes.eye1)
+
+    def _wink2(self): return self._wink(self.eyes.eye2)
+
+    def _wink(self, eye):
         loginfo("Wink")
-        eye = self.eyes.eye1
         eye.go_to(l=0.7)
         sleep(2)
         eye.go_to(l=0.9)
-        sleep(5)
+        sleep(3)
         eye.go_to(l=0.4)
         sleep(2)
         eye.go_to(l=0.2)
@@ -63,6 +79,18 @@ class ArcEyePuppet(GuiDemo):
         eye.go_to(l=0.0)
         sleep(2)
         loginfo("Done")
+    
+    def blink(self):
+        if self._blink_thread is not None and self._blink_thread.is_alive():
+            return False
+        self._blink_thread = Thread(target=self._blink)
+        return self._blink_thread.start()
+
+    def _blink(self):    
+        t1 = Thread(target=self._wink1)
+        t2 = Thread(target=self._wink2)
+        t1.start()
+        t2.start()
 
 demo = ArcEyePuppet()
 demo.init()
