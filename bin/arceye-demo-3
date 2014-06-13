@@ -59,18 +59,6 @@ def wink():
 loginfo("Looping...")
 while not gui.done:
     loginfo("Hello")
-    
-    #lids - much smoother return on both eyes
-    gui.eyes.go_to(l=0.7)
-    sleep(2)
-    gui.eyes.go_to(l=0.9)
-    sleep(5)
-    gui.eyes.go_to(l=0.4)
-    sleep(2)
-    gui.eyes.go_to(l=0.2)
-    sleep(1)
-    gui.eyes.go_to(l=0.0)
-    sleep(2)
 
     wink()
 
@@ -101,18 +89,7 @@ while not gui.done:
     gui.eyes.go_to(0.0, 0.0) #(-left +right, -up, +down) from front
     sleep(3)
 
-    #lids - much smoother return on both eyes
-    gui.eyes.go_to(l=0.7)
-    sleep(2)
-    gui.eyes.go_to(l=0.9)
-    sleep(1)
-    gui.eyes.go_to(l=0.4)
-    sleep(2)
-    gui.eyes.go_to(l=0.2)
-    sleep(1)
-    gui.eyes.go_to(l=0.0)
-    sleep(5)
-
+    wink()
 
     gui.eyes.go_to(0.4, 0.4) #(-left +right, -up, +down) from front
     sleep(1)
@@ -129,31 +106,9 @@ while not gui.done:
     gui.eyes.go_to(0.6, 0.0) #(-left +right, -up, +down) from front
     sleep(3)
     gui.eyes.go_to(0.8, 0.0) #(-left +right, -up, +down) from front
-     
-    #lids - much smoother return on both eyes
-    gui.eyes.go_to(l=0.7)
-    sleep(2)
-    gui.eyes.go_to(l=0.9)
-    sleep(1)
-    gui.eyes.go_to(l=0.4)
-    sleep(2)
-    gui.eyes.go_to(l=0.2)
-    sleep(1)
-    gui.eyes.go_to(l=0.0)
-    sleep(5)
 
-    #lids - much smoother return on both eyes
-    gui.eyes.go_to(l=0.7)
-    sleep(2)
-    gui.eyes.go_to(l=0.9)
-    sleep(1)
-    gui.eyes.go_to(l=0.4)
-    sleep(2)
-    gui.eyes.go_to(l=0.2)
-    sleep(1)
-    gui.eyes.go_to(l=0.0)
-    sleep(2)
-
+    wink()
+    wink()
 
     gui.eyes.go_to(-0.4, 0.0) #(-left +right, -up, +down) from front
     sleep(2)
