@@ -203,7 +203,7 @@ class Joint(object):
         pwm = abs(self.command)
         if pwm > self.pwm_limit:
             pwm = self.pwm_limit
-        return pwm
+        return int(pwm)
 
     def get_direction(self):
         direc = 1
@@ -327,8 +327,9 @@ class ArcEye(object):
 
     def send_commands(self):
         if not self.is_connected: return
+        # 42 is a keep alive for the motors
         cmd = ""
-        cmd = "%s,%s,%s,%s,%s,%s,%s,%s,%s,\n"%(
+        cmd = "%s,%s,%s,%s,%s,%s,%s,%s,%s,42,\n"%(
             self.yaw.get_pwm(), self.yaw.get_direction(), self.yaw.get_brake_cmd(),
             self.pitch.get_pwm(), self.pitch.get_direction(), self.pitch.get_brake_cmd(),
             self.lid.get_pwm(), self.lid.get_direction(), self.lid.get_brake_cmd(),
