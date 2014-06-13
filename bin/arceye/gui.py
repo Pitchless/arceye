@@ -118,6 +118,11 @@ class GuiBase(object):
                 self.display_header()
                 self.display()
             pygame.display.flip()
+        self.quit()
+
+    def quit(self):
+        self.done = True
+        pygame.display.quit()
 
     def _display_help(self):
         self.guitxt.color(255,255,0)
