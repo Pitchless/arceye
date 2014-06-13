@@ -13,7 +13,7 @@ class ArcEyePuppet(GuiDemo):
     def __init__(self, *args, **kw):
         super(ArcEyePuppet, self).__init__(*args, **kw)
         self._wink_thread = None
-        self.target = Target(0,0,0)
+        self.target = Target(0,0,None)
 
     def init(self):
         super(ArcEyePuppet, self).init()
