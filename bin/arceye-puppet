@@ -8,11 +8,14 @@ class ArcEyePuppet(GuiDemo):
     def __init__(self, *args, **kw):
         super(ArcEyePuppet, self).__init__(*args, **kw)
         self._wink_thread = None
+        self.target = Target(0,0,0)
 
     def handle_event(self, event):
-        if event.type == pygame.KEYUP:
+        if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_w:
                 self.wink()
+            if event.key == pygame.K_UP:
+                loginfo("UP!")
 
     def wink(self):
         loginfo("Hello")
