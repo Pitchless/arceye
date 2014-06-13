@@ -80,7 +80,7 @@ class Commander(GuiBase):
 
     def handle_keys_pressed(self, keys):
         if keys[pygame.K_SPACE]:
-            self.eyes.stop()
+            self.eyes.deactivate()
         elif keys[pygame.K_0]:
             self.eyes.zero_target()
 

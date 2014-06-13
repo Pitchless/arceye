@@ -410,9 +410,6 @@ class ArcEye(object):
     def deactivate(self):
         for j in self.all_joints(): j.deactivate()
 
-    def stop(self):
-        for j in self.all_joints(): j.deactivate()
-
     def go_to(self, x=None, y=None, l=None):
         """
         Goto a position. x and y are yaw and pitch, -1..1 over the joints
@@ -464,9 +461,9 @@ class Robot(object):
             self.read_status()
             self.send_commands()
 
-    def stop(self):
-        if self.eye1: self.eye1.stop()
-        if self.eye2: self.eye2.stop()
+    def deactivate(self):
+        if self.eye1: self.eye1.deactivate()
+        if self.eye2: self.eye2.deactivate()
 
     def zero_target(self):
         if self.eye1:
