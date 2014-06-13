@@ -418,7 +418,7 @@ class ArcEye(object):
         Goto a position. x and y are yaw and pitch, -1..1 over the joints
         calibrated range. l is the lid position. 0 is considered center.
         """
-        loginfo("Goto %s,%s,%s"%(x,y,l))
+        loginfo("Goto x:%s y:%s l:%s"%(x,y,l))
         self.target = Target(x,y,l)
 
     def run(self):
@@ -464,8 +464,10 @@ class Robot(object):
         if self.eye2:
             for j in self.eye2.all_joints(): j.target = 0
 
-    def go_to(self, x=None, y=None, l=None):
+    def go_to(self, x=None, y=None, l=None, s=0):
         self.target = Target(x,y,l)
         if self.eye1: self.eye1.go_to(x,y,l)
         if self.eye2: self.eye2.go_to(x,y,l)
+        if s > 0:
+            sleep(s)
 

@@ -29,7 +29,7 @@ while not gui.eyes.eye1.is_connected:
     sleep(1)
 
 loginfo("Gentlemen start your engines...")
-i = 23
+i = 9
 while i > 0:
     loginfo(str(i))
     sleep(1)
@@ -39,11 +39,13 @@ gui.eyes.eye1.activate()
 gui.eyes.eye2.activate()
 
 loginfo("Going to zero...")
-gui.eyes.go_to(0.0, 0.0)
-sleep(10)
+gui.eyes.go_to(0.0, 0.0, 0.0, s=10)
+loginfo("Done")
+#sleep(10)
 
 def wink():
     #lids - much smoother return on both eyes
+    loginfo("Wink")
     eye = gui.eyes.eye1
     eye.go_to(l=0.7)
     sleep(2)
@@ -55,6 +57,7 @@ def wink():
     sleep(1)
     eye.go_to(l=0.0)
     sleep(2)
+    loginfo("Done")
 
 loginfo("Looping...")
 while not gui.done:
@@ -62,32 +65,19 @@ while not gui.done:
 
     wink()
 
-    gui.eyes.go_to(0.8, 0.0) #(-left +right, -up, +down) from front
-    sleep(2)
-    gui.eyes.go_to(0.6, 0.0) #(-left +right, -up, +down) from front
-    sleep(2)
-    gui.eyes.go_to(0.2, 0.0) #(-left +right, -up, +down) from front
-    sleep(2)
-    gui.eyes.go_to(-0.2, 0.0) #(-left +right, -up, +down) from front
-    sleep(2)
-    gui.eyes.go_to(-0.6, 0.0) #(-left +right, -up, +down) from front
-    sleep(2)
-    gui.eyes.go_to(-0.8, 0.0) #(-left +right, -up, +down) from front
-    sleep(4)
-    gui.eyes.go_to(-0.6, -0.2) #(-left +right, -up, +down) from front
-    sleep(2)
-    gui.eyes.go_to(0.8, 0.8) #(-left +right, -up, +down) from front
-    sleep(1)
-    gui.eyes.go_to(0.8, 0.6) #(-left +right, -up, +down) from front
-    sleep(5)
-    gui.eyes.go_to(0.2, -0.8) #(-left +right, -up, +down) from front
-    sleep(3)
-    gui.eyes.go_to(0.6, -0.8) #(-left +right, -up, +down) from front
-    sleep(2)
-    gui.eyes.go_to(0.8, -0.6) #(-left +right, -up, +down) from front
-    sleep(4)
-    gui.eyes.go_to(0.0, 0.0) #(-left +right, -up, +down) from front
-    sleep(3)
+    gui.eyes.go_to( 0.8,  0.0, s=2) #(-left +right, -up, +down) from front
+    gui.eyes.go_to( 0.6,  0.0, s=2) #(-left +right, -up, +down) from front
+    gui.eyes.go_to( 0.2,  0.0, s=2) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(-0.2,  0.0, s=2) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(-0.6,  0.0, s=2) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(-0.8,  0.0, s=4) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(-0.6, -0.2, s=2) #(-left +right, -up, +down) from front
+    gui.eyes.go_to( 0.8,  0.8, s=2) #(-left +right, -up, +down) from front
+    gui.eyes.go_to( 0.8,  0.6, s=5) #(-left +right, -up, +down) from front
+    gui.eyes.go_to( 0.2, -0.8, s=3) #(-left +right, -up, +down) from front
+    gui.eyes.go_to( 0.6, -0.8, s=2) #(-left +right, -up, +down) from front
+    gui.eyes.go_to( 0.8, -0.6, s=4) #(-left +right, -up, +down) from front
+    gui.eyes.go_to( 0.0,  0.0, s=3) #(-left +right, -up, +down) from front
 
     wink()
 
