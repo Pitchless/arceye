@@ -47,7 +47,11 @@ class GuiText(object):
 
 
 class GuiBase(object):
-    def __init__(self, name = "ArcEye", w=640, h=640, config1=None, config2=None):
+    def __init__(self, name = "ArcEye", w=640, h=640, config1=None, config2=None, argv=sys.argv):
+        if len(argv) > 1:
+            config1 = argv[1]
+        if len(argv) > 2:
+            config2 = argv[2]
         self.config1   = config1
         self.config2   = config2
         self.eyes      = Robot(config1=config1, config2=config2)
@@ -60,7 +64,7 @@ class GuiBase(object):
         self.done      = False
         self.show_help = False
         self.screen    = None
-        self.is_threaded = False
+        self.thread    = None
 
     def init(self):
         # Start the gui
@@ -74,22 +78,22 @@ class GuiBase(object):
         self.guitxt.font("droidsansmono", 14)
 
     def run(self, thread=False):
-        self.is_threaded = thread
         if not thread:
             return self._run()
+
+    def start(self):
+        """Run on a thread, returns and GUI runs async. Thread in self.thread."""
         if self.eyes.eye1:
             self.eyes.eye1.run()
         if self.eyes.eye2:
             self.eyes.eye2.run()
-        t = Thread(target=self._run)
-        return t.start()
+        self.thread = Thread(target=self.run)
+        return self.thread.start()
 
-    def _run(self):
+    def run(self):
+        """Run the GUI, blocks until self.done is True."""
         while not self.done:
             self.frame += 1
-            # Read eye status
-            if not self.is_threaded:
-                self.eyes.read_status()
             # Check for gui events
             for event in pygame.event.get(): # User did something
                 if event.type == pygame.QUIT: # If user clicked close
@@ -104,21 +108,24 @@ class GuiBase(object):
                 self.show_help = toggle(self.show_help)
             else:
                 self.handle_keys_pressed(keys)
-            # Update the eye and it's joints (runs their pids)
-            if not self.is_threaded:
-                self.eyes.update()
             # Update the display
             self.screen.fill((0,0,0))
             self.guitxt.reset()
-            self.guitxt.color(255,255,0)
+            self.guitxt.color(0,255,0)
             if self.show_help:
                 self._display_help()
             else:
                 self.display_header()
                 self.display()
             pygame.display.flip()
+        self.quit()
+
+    def quit(self):
+        self.done = True
+        pygame.display.quit()
 
     def _display_help(self):
+        self.guitxt.color(255,255,0)
         self.guitxt.text("**** Arcself.eye ***")
         self.guitxt.text("")
         self.guitxt.text("ESC - Quit")
@@ -136,11 +143,12 @@ class GuiBase(object):
         pass
 
     def display_header(self):
-        self.guitxt.text("Frame: %s"%self.frame)
+        self.guitxt.text("ArcEye (%s) Frame:%s"%(sys.argv[0], self.frame))
         self.guitxt.text("")
 
     def display_eye(self, eye):
-        self.guitxt.text("Eye %s"%eye.port)
+        self.guitxt.color(255,255,0)
+        self.guitxt.text("EYE %s %s"%(eye.port,eye.config_file))
         self.guitxt.boolean("Connected", eye.is_connected)
         if eye.bat_volt1 < 18: # over
             self.guitxt.color(255,0,0)
@@ -159,7 +167,7 @@ class GuiBase(object):
         self.guitxt.indent()
         for j in eye.all_joints():
             self.guitxt.color(255,255,0)
-            self.guitxt.text(j.name)
+            self.guitxt.text(j.name.upper())
             self.guitxt.color(0,255,0)
             self.guitxt.indent()
             if j.pos > j.pos_max or j.pos < j.pos_min:
@@ -168,9 +176,10 @@ class GuiBase(object):
             self.guitxt.text("Position: %s (%s..%s)"%(j.pos, j.pos_min, j.pos_max))
             self.guitxt.color(0,255,0)
             self.guitxt.text("Command: %s"%j.command)
-            self.guitxt.text("PWM: %s Dir:%s Reverse:%s"%(
+            self.guitxt.text("PWM: %s Dir:%s (Rev:%s)"%(
                 j.get_pwm(),j.get_direction(), j.reverse))
-            self.guitxt.text("Brake: %s"%j.brake_cmd)
+            self.guitxt.boolean("Brake", j.brake_cmd,
+                    col_true=(0,255,0), col_false=(0,100,0))
             self.guitxt.color(0,255,0) if j.active else self.guitxt.color(0,100,0)
             self.guitxt.text("Active: %s"%j.active)
             self.guitxt.indent()
@@ -180,7 +189,46 @@ class GuiBase(object):
             self.guitxt.text("P:%s I:%s D:%s"%(j.pid.Kp, j.pid.Ki, j.pid.Kd))
             self.guitxt.unindent()
             self.guitxt.unindent()
-        self.guitxt.color(0,255,0)
+        self.guitxt.color(0,180,0)
         self.guitxt.text("")
         self.guitxt.text("Status %s"%eye.status)
         self.guitxt.text("Command %s"%eye.last_cmd)
+
+class GuiDemo(GuiBase):
+    def init(self):
+        super(GuiDemo, self).init()
+        self.name = "ArcEye Demo"
+
+    def handle_keys_pressed(self, keys):
+        # Stop!
+        if keys[pygame.K_SPACE]:
+            self.eyes.deactivate()
+        elif keys[pygame.K_0]:
+            self.eyes.zero_target()
+
+        # Controllers on/off
+        elif keys[pygame.K_1]:
+            self.eye1.yaw.toggle_active()
+        elif keys[pygame.K_2]:
+            self.eye1.pitch.toggle_active()
+        elif keys[pygame.K_3]:
+            self.eye1.lid.toggle_active()
+        elif keys[pygame.K_4]:
+            self.eye2.yaw.toggle_active()
+        elif keys[pygame.K_5]:
+            self.eye2.pitch.toggle_active()
+        elif keys[pygame.K_6]:
+            self.eye2.lid.toggle_active()
+
+    def display_help(self):
+        self.guitxt.text("TODO")
+
+    def display(self):
+        # Update the display
+        if self.eye1:
+            self.display_eye(self.eye1)
+        if self.eye2:
+            self.guitxt.y = 40
+            self.guitxt.x = 300
+            self.display_eye(self.eye2)
+            self.guitxt.x = 10

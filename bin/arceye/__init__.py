@@ -137,11 +137,10 @@ class Joint(object):
 
     def set_pos_raw(self, v):
         self.pos_raw = v
-        self.pos = v - self.pos_center_raw
+        self.pos     = v - self.pos_center_raw
 
     @property
-    def target(self):
-        return self.pid.getPoint()
+    def target(self): return self.pid.getPoint()
 
     @target.setter
     def target(self, value):
@@ -153,6 +152,7 @@ class Joint(object):
 
     @property
     def target_rel(self):
+        """Returns current targets position in -1..1 range."""
         value = self.target
         if value == 0:
             return 0
@@ -221,45 +221,38 @@ class Joint(object):
     def update(self):
         if not self.active:
             return
+        #if self.in_deadzone():
+        #    cmd = self.command
         cmd = self.pid.update(self.pos)
         if self.pos >= self.pos_max and cmd > 0:
-            # Ignore positive commands over the max
-            cmd = 0
+            cmd = 0 # Ignore positive commands over the max
         elif self.pos <= self.pos_min and cmd < 0:
-            # Ignore negative commands under the min
-            cmd = 0
-        #elif self.in_deadzone():
-        #    cmd = 0
+            cmd = 0 # Ignore negative commands under the min
         self.command = cmd
 
     def update_config(self, config):
         """Update with the new config, dict of dicts etc, return from yaml parse"""
         if config is None: return
-        if config.has_key('pwm_limit'):
-            self.pwm_limit = config['pwm_limit']
-        if config.has_key('pos_center_raw'):
-            self.pos_center_raw = config['pos_center_raw']
-        if config.has_key('pos_max'):
-            self.pos_max = config['pos_max']
-        if config.has_key('pos_min'):
-            self.pos_min = config['pos_min']
-        if config.has_key('deadzone'):
-            self.deadzone = config['deadzone']
-        if config.has_key('reverse'):
-            self.reverse = config['reverse']
-        if config.has_key('p'):
-            self.pid.setKp(config['p'])
-        if config.has_key('i'):
-            self.pid.setKi(config['i'])
-        if config.has_key('d'):
-            self.pid.setKd(config['d'])
+        if config.has_key('pwm_limit')      : self.pwm_limit = config['pwm_limit']
+        if config.has_key('pos_center_raw') : self.pos_center_raw = config['pos_center_raw']
+        if config.has_key('pos_max')        : self.pos_max = config['pos_max']
+        if config.has_key('pos_min')        : self.pos_min = config['pos_min']
+        if config.has_key('deadzone')       : self.deadzone = config['deadzone']
+        if config.has_key('reverse')        : self.reverse = config['reverse']
+        if config.has_key('p')              : self.pid.setKp(config['p'])
+        if config.has_key('i')              : self.pid.setKi(config['i'])
+        if config.has_key('d')              : self.pid.setKd(config['d'])
 
 
 class Target(object):
+    """A position target for the eye to go to."""
     def __init__(self, x, y, l):
         self.x = x
         self.y = y
         self.l = l
+
+    def __repr__(self):
+        return "Target x:%s y:%s l:%s"%(self.x, self.y, self.l)
 
 class ArcEye(object):
     """
@@ -268,41 +261,43 @@ class ArcEye(object):
     Joint objects for the yaw, pitch and lid joints.
     """
     def __init__(self, port="/dev/ttyUSB0", config_file=None):
-        self.port   = port
-        self.is_connected = False
-        self.retry_connect_timeout = 123
-        self._retry_connect_count = self.retry_connect_timeout
-        self.status = None
-        self.command_rate = 1
-        self.last_cmd = ""
-        self.yaw    = Joint("yaw")
-        self.pitch  = Joint("pitch")
-        self.lid    = Joint("lid")
-        self.bat_volt1 = 0
-        self.bat_volt2 = 0
+        self.port                  = port
+        self.is_connected          = False
+        self.retry_connect_timeout = 3
+        self.connect_attempts      = 0
+        self.command_rate          = 1
 
-        self.config = {}
-        self.config_file = None
+        # Add out joints (before config as they get configured)
+        self.yaw   = Joint("yaw")
+        self.pitch = Joint("pitch")
+        self.lid   = Joint("lid")
+
+        self.config          = {}
+        self.config_file     = None
         self.config_st_mtime = 0
-        self.config_rate = 100
+        self.config_rate     = 100
         if config_file:
            self.load_config(config_file)
 
-        self.frame = 0
-        self.target = None
+        self.frame     = 0
+        self.status    = None
+        self.last_cmd  = ""
+        self.bat_volt1 = 0
+        self.bat_volt2 = 0
+        self.target    = None
+        self.thread    = None
 
-    def all_joints(self):
-        return (self.yaw, self.pitch, self.lid)
+    def all_joints(self): return (self.yaw, self.pitch, self.lid)
 
     def connect(self):
         """
         Try to connect to the board. Throws if problems.
+        Sets is_connected when connected, sets to false before trying.
         Note that the class auto connects on the first status read, handling
         errors and re-connect logic, so you don't normally need to call this
         direct.
         """
         self.is_connected = False
-        self._retry_connect_count = self.retry_connect_timeout
         self.ser = Serial(self.port, 115200)
         sleep(3) # wait for the board to reset
         loginfo("Connected to %s"%self.port)
@@ -326,7 +321,7 @@ class ArcEye(object):
             self.bat_volt2 = float(values[4])
         except SerialException as e:
             self.is_connected = False
-            logerr("Serial exception (retry in %s): %s"%(self.retry_connect_timeout,e))
+            logerr("Serial (retry in %s): %s"%(self.retry_connect_timeout,e))
         except Exception as e:
             logerr(e)
 
@@ -342,7 +337,7 @@ class ArcEye(object):
             self.ser.write(cmd)
         except SerialException as e:
             self.is_connected = False
-            logerr("Serial exception (retry in %s): %s"%(self.retry_connect_timeout,e))
+            logerr("Serial (retry in %s): %s"%(self.retry_connect_timeout,e))
         except Exception as e:
             logerr(e)
         self.last_cmd = cmd
@@ -350,14 +345,19 @@ class ArcEye(object):
     def update(self):
         self.frame += 1
         try:
+            # Get a connection if we dont have one.
             if not self.is_connected:
-                self._retry_connect_count -= 1
-                if self._retry_connect_count < 0:
-                    return self.connect()
+                try:
+                    self.connect_attempts += 1
+                    self.connect()
+                except SerialException as e:
+                    logerr("Serial (attempt %s, retry in %s): %s"%(
+                        self.connect_attempts, self.retry_connect_timeout, e))
+                sleep(self.retry_connect_timeout)
 
+            # We got a target
             if self.target:
                 if self.target.x is not None:
-                    loginfo("TARGET! %s"%self.target.x)
                     self.yaw.target_rel = self.target.x
                 if self.target.y is not None:
                     self.pitch.target_rel = self.target.y
@@ -365,18 +365,19 @@ class ArcEye(object):
                     self.lid.target_rel = self.target.l
                 self.target = None
 
+            # Update all the joints
             for j in self.all_joints():
                 j.update()
 
+            # Send command at the command rate
             if self.command_rate == 1 or self.frame % self.command_rate == 0:
                 self.send_commands()
 
-            # avoid lots of stat calls
-            if self.config_file and self.config_rate > 0 and self.frame % self.config_rate == 0:
-                if os.stat(self.config_file).st_mtime > self.config_st_mtime:
-                    self.reload_config()
-        except SerialException as e:
-            logerr("Serial exception (retry in %s): %s"%(self.retry_connect_timeout,e))
+            # Reload config? Avoid lots of stat calls
+            if self.config_file and self.config_rate > 0:
+                if self.frame % self.config_rate == 0:
+                    if os.stat(self.config_file).st_mtime > self.config_st_mtime:
+                        self.reload_config()
         except Exception as e:
             logerr(e)
 
@@ -386,8 +387,8 @@ class ArcEye(object):
             config = yaml.load(file(config_file))
             self.update_config(config)
             # Only update if config loaded and updated ok
-            self.config = config
-            self.config_file = config_file
+            self.config          = config
+            self.config_file     = config_file
             self.config_st_mtime = os.stat(config_file).st_mtime
         except Exception as e:
             logerr("Failed to load config file:%s - %s"%(config_file,e))
@@ -401,41 +402,32 @@ class ArcEye(object):
 
     def update_config(self, config):
         """Update with the new config, dict of dicts etc, return from yaml parse"""
-        if config is None:
-            return
-        if config.has_key('port'):
-            self.port = config['port']
-        if config.has_key('command_rate'):
-            self.command_rate = config['command_rate']
+        if config is None: return
+        if config.has_key('port')         : self.port = config['port']
+        if config.has_key('command_rate') : self.command_rate = config['command_rate']
         # Joints
-        if config.has_key('yaw'):
-            self.yaw.update_config(config['yaw'])
-        if config.has_key('pitch'):
-            self.pitch.update_config(config['pitch'])
-        if config.has_key('lid'):
-            self.lid.update_config(config['lid'])
+        if config.has_key('yaw')          : self.yaw.update_config(config['yaw'])
+        if config.has_key('pitch')        : self.pitch.update_config(config['pitch'])
+        if config.has_key('lid')          : self.lid.update_config(config['lid'])
 
     def activate(self):
-        for j in self.all_joints():
-            j.activate()
+        for j in self.all_joints(): j.activate()
 
     def deactivate(self):
-        for j in self.all_joints():
-            j.deactivate()
-
-    def stop(self):
-        for j in self.all_joints():
-            j.command = 0
-            j.active = False
-            j.target = None
+        for j in self.all_joints(): j.deactivate()
 
     def go_to(self, x=None, y=None, l=None):
-        loginfo("Goto %s,%s,%s"%(x,y,l))
+        """
+        Goto a position. x and y are yaw and pitch, -1..1 over the joints
+        calibrated range. l is the lid position. 0 is considered center.
+        """
+        loginfo("Goto x:%s y:%s l:%s"%(x,y,l))
         self.target = Target(x,y,l)
 
     def run(self):
-        t = Thread(target=self._run)
-        return t.start()
+        self.thread = Thread(target=self._run)
+        self.thread.daemon = True
+        return self.thread.start()
 
     def _run(self):
         while True:
@@ -457,32 +449,37 @@ class Robot(object):
                 logerr("Eye2 on same port as eye1")
                 self.eye2 = None
 
-    def read_status(self):
+    def wait_for_connection(self, retries=10):
         if self.eye1:
-            self.eye1.read_status()
+            count = 0
+            while not self.eye1.is_connected:
+                loginfo("Waiting for eye1")
+                sleep(1)
+                count += 1
+                if retries > 0 and count > retries:
+                    logerr("Giving up on eye1 connection")
+                    break
         if self.eye2:
-            self.eye2.read_status()
+            count = 0
+            while not self.eye2.is_connected:
+                loginfo("Waiting for eye2")
+                sleep(1)
+                count += 1
+                if retries > 0 and count > retries:
+                    logerr("Giving up on eye2 connection")
+                    break
+
+    def read_status(self):
+        if self.eye1: self.eye1.read_status()
+        if self.eye2: self.eye2.read_status()
 
     def update(self):
-        if self.eye1:
-            self.eye1.update()
-        if self.eye2:
-            self.eye2.update()
+        if self.eye1: self.eye1.update()
+        if self.eye2: self.eye2.update()
 
-    def run(self, thread=False):
-        if not thread:
-            return self._run()
-        t = Thread(target=self._run)
-        return t.start()
-
-    def _run(self):
-        while True:
-            self.read_status()
-            self.send_commands()
-
-    def stop(self):
-        if self.eye1: self.eye1.stop()
-        if self.eye2: self.eye2.stop()
+    def deactivate(self):
+        if self.eye1: self.eye1.deactivate()
+        if self.eye2: self.eye2.deactivate()
 
     def zero_target(self):
         if self.eye1:
@@ -490,10 +487,10 @@ class Robot(object):
         if self.eye2:
             for j in self.eye2.all_joints(): j.target = 0
 
-    def go_to(self, x=None, y=None, l=None):
+    def go_to(self, x=None, y=None, l=None, s=0):
         self.target = Target(x,y,l)
-        if self.eye1:
-            self.eye1.go_to(x,y,l)
-        if self.eye2:
-            self.eye2.go_to(x,y,l)
-            
+        if self.eye1: self.eye1.go_to(x,y,l)
+        if self.eye2: self.eye2.go_to(x,y,l)
+        if s > 0:
+            sleep(s)
+

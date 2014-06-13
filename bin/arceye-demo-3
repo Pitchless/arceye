@@ -1,74 +1,16 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-import sys, os
-import yaml
 from arceye import *
 from arceye.gui import *
 
-# Read config from command line if set
-config_file = None
-if len(sys.argv) > 1:
-    config_file = sys.argv[1]
-    config = yaml.load(file(sys.argv[1]))
-
-config_file_2 = None
-if len(sys.argv) > 2:
-    config_file_2 = sys.argv[2]
-
-class Demo1(GuiBase):
-    def init(self):
-        super(Demo1, self).init()
-        self.name = "ArcEye Demo 1"
-
-    def handle_keys_pressed(self, keys):
-        # Stop!
-        if keys[pygame.K_SPACE]:
-            self.eyes.stop()
-        elif keys[pygame.K_0]:
-            self.eyes.zero_target()
-
-        # Controllers on/off
-        elif keys[pygame.K_1]:
-            self.eye1.yaw.toggle_active()
-        elif keys[pygame.K_2]:
-            self.eye1.pitch.toggle_active()
-        elif keys[pygame.K_3]:
-            self.eye1.lid.toggle_active()
-        elif keys[pygame.K_4]:
-            self.eye2.yaw.toggle_active()
-        elif keys[pygame.K_5]:
-            self.eye2.pitch.toggle_active()
-        elif keys[pygame.K_6]:
-            self.eye2.lid.toggle_active()
-
-    def display_help(self):
-        self.guitxt.text("TODO")
-
-    def display(self):
-        # Update the display
-        if self.eye1:
-            self.display_eye(self.eye1)
-        if self.eye2:
-            self.guitxt.y = 40
-            self.guitxt.x = 300
-            self.display_eye(self.eye2)
-            self.guitxt.x = 10
-
-gui = Demo1(config1=config_file, config2=config_file_2)
+gui = GuiDemo()
 gui.init()
-gui.run(thread=True)
-
-while not gui.eyes.eye1.is_connected:
-    loginfo("Waiting for eye1")
-    sleep(1)
-
-while not gui.eyes.eye1.is_connected:
-    loginfo("Waiting for eye2")
-    sleep(1)
+gui.start()
+gui.eyes.wait_for_connection()
 
 loginfo("Gentlemen start your engines...")
-i = 23
+i = 9
 while i > 0:
     loginfo(str(i))
     sleep(1)
@@ -77,12 +19,14 @@ loginfo("GO")
 gui.eyes.eye1.activate()
 gui.eyes.eye2.activate()
 
-loginfo("Going to zero...")    
-gui.eyes.go_to(0.0, 0.0)
-sleep(10)
+loginfo("Going to zero...")
+gui.eyes.go_to(0.0, 0.0, 0.0, s=10)
+loginfo("Done")
+#sleep(10)
 
 def wink():
     #lids - much smoother return on both eyes
+    loginfo("Wink")
     eye = gui.eyes.eye1
     eye.go_to(l=0.7)
     sleep(2)
@@ -94,64 +38,29 @@ def wink():
     sleep(1)
     eye.go_to(l=0.0)
     sleep(2)
+    loginfo("Done")
 
 loginfo("Looping...")
 while not gui.done:
     loginfo("Hello")
-    
-    #lids - much smoother return on both eyes
-    gui.eyes.go_to(l=0.7)
-    sleep(2)
-    gui.eyes.go_to(l=0.9)
-    sleep(5)
-    gui.eyes.go_to(l=0.4)
-    sleep(2)
-    gui.eyes.go_to(l=0.2)
-    sleep(1)
-    gui.eyes.go_to(l=0.0)
-    sleep(2)
 
     wink()
 
-    gui.eyes.go_to(0.8, 0.0) #(-left +right, -up, +down) from front
-    sleep(2)
-    gui.eyes.go_to(0.6, 0.0) #(-left +right, -up, +down) from front
-    sleep(2)
-    gui.eyes.go_to(0.2, 0.0) #(-left +right, -up, +down) from front
-    sleep(2)
-    gui.eyes.go_to(-0.2, 0.0) #(-left +right, -up, +down) from front
-    sleep(2)
-    gui.eyes.go_to(-0.6, 0.0) #(-left +right, -up, +down) from front
-    sleep(2)
-    gui.eyes.go_to(-0.8, 0.0) #(-left +right, -up, +down) from front
-    sleep(4)
-    gui.eyes.go_to(-0.6, -0.2) #(-left +right, -up, +down) from front
-    sleep(2)
-    gui.eyes.go_to(0.8, 0.8) #(-left +right, -up, +down) from front
-    sleep(1)
-    gui.eyes.go_to(0.8, 0.6) #(-left +right, -up, +down) from front
-    sleep(5)
-    gui.eyes.go_to(0.2, -0.8) #(-left +right, -up, +down) from front
-    sleep(3)
-    gui.eyes.go_to(0.6, -0.8) #(-left +right, -up, +down) from front
-    sleep(2)
-    gui.eyes.go_to(0.8, -0.6) #(-left +right, -up, +down) from front
-    sleep(4)
-    gui.eyes.go_to(0.0, 0.0) #(-left +right, -up, +down) from front
-    sleep(3)
+    gui.eyes.go_to( 0.8,  0.0, s=2) #(-left +right, -up, +down) from front
+    gui.eyes.go_to( 0.6,  0.0, s=2) #(-left +right, -up, +down) from front
+    gui.eyes.go_to( 0.2,  0.0, s=2) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(-0.2,  0.0, s=2) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(-0.6,  0.0, s=2) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(-0.8,  0.0, s=4) #(-left +right, -up, +down) from front
+    gui.eyes.go_to(-0.6, -0.2, s=2) #(-left +right, -up, +down) from front
+    gui.eyes.go_to( 0.8,  0.8, s=2) #(-left +right, -up, +down) from front
+    gui.eyes.go_to( 0.8,  0.6, s=5) #(-left +right, -up, +down) from front
+    gui.eyes.go_to( 0.2, -0.8, s=3) #(-left +right, -up, +down) from front
+    gui.eyes.go_to( 0.6, -0.8, s=2) #(-left +right, -up, +down) from front
+    gui.eyes.go_to( 0.8, -0.6, s=4) #(-left +right, -up, +down) from front
+    gui.eyes.go_to( 0.0,  0.0, s=3) #(-left +right, -up, +down) from front
 
-    #lids - much smoother return on both eyes
-    gui.eyes.go_to(l=0.7)
-    sleep(2)
-    gui.eyes.go_to(l=0.9)
-    sleep(1)
-    gui.eyes.go_to(l=0.4)
-    sleep(2)
-    gui.eyes.go_to(l=0.2)
-    sleep(1)
-    gui.eyes.go_to(l=0.0)
-    sleep(5)
-
+    wink()
 
     gui.eyes.go_to(0.4, 0.4) #(-left +right, -up, +down) from front
     sleep(1)
@@ -168,31 +77,9 @@ while not gui.done:
     gui.eyes.go_to(0.6, 0.0) #(-left +right, -up, +down) from front
     sleep(3)
     gui.eyes.go_to(0.8, 0.0) #(-left +right, -up, +down) from front
-     
-    #lids - much smoother return on both eyes
-    gui.eyes.go_to(l=0.7)
-    sleep(2)
-    gui.eyes.go_to(l=0.9)
-    sleep(1)
-    gui.eyes.go_to(l=0.4)
-    sleep(2)
-    gui.eyes.go_to(l=0.2)
-    sleep(1)
-    gui.eyes.go_to(l=0.0)
-    sleep(5)
 
-    #lids - much smoother return on both eyes
-    gui.eyes.go_to(l=0.7)
-    sleep(2)
-    gui.eyes.go_to(l=0.9)
-    sleep(1)
-    gui.eyes.go_to(l=0.4)
-    sleep(2)
-    gui.eyes.go_to(l=0.2)
-    sleep(1)
-    gui.eyes.go_to(l=0.0)
-    sleep(2)
-
+    wink()
+    wink()
 
     gui.eyes.go_to(-0.4, 0.0) #(-left +right, -up, +down) from front
     sleep(2)
@@ -207,5 +94,5 @@ while not gui.done:
     gui.eyes.go_to(0.0, 0.0) #(-left +right, -up, +down) from front
     sleep(2)
 
-
-gui.eyes.eye3.deactivate()
+gui.eyes.eye1.deactivate()
+gui.eyes.eye2.deactivate()
