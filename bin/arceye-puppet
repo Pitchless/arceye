@@ -29,6 +29,8 @@ class ArcEyePuppet(GuiDemo):
                 self.wink2()
             elif event.key == pygame.K_b:
                 self.blink()
+            elif event.key == pygame.K_0:
+                self.target = Target(0,0,0)
         if event.type == pygame.KEYDOWN:
             new_target = False
             if event.key == pygame.K_UP:
