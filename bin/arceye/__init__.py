@@ -282,6 +282,7 @@ class ArcEye(object):
         self.bat_volt1 = 0
         self.bat_volt2 = 0
         self.target    = None
+        self.thread    = None
 
     def all_joints(self): return (self.yaw, self.pitch, self.lid)
 
@@ -381,8 +382,8 @@ class ArcEye(object):
             config = yaml.load(file(config_file))
             self.update_config(config)
             # Only update if config loaded and updated ok
-            self.config = config
-            self.config_file = config_file
+            self.config          = config
+            self.config_file     = config_file
             self.config_st_mtime = os.stat(config_file).st_mtime
         except Exception as e:
             logerr("Failed to load config file:%s - %s"%(config_file,e))
@@ -419,8 +420,9 @@ class ArcEye(object):
         self.target = Target(x,y,l)
 
     def run(self):
-        t = Thread(target=self._run)
-        return t.start()
+        self.thread = Thread(target=self._run)
+        self.thread.daemon = True
+        return self.thread.start()
 
     def _run(self):
         while True:
@@ -449,17 +451,6 @@ class Robot(object):
     def update(self):
         if self.eye1: self.eye1.update()
         if self.eye2: self.eye2.update()
-
-    def run(self, thread=False):
-        if not thread:
-            return self._run()
-        t = Thread(target=self._run)
-        return t.start()
-
-    def _run(self):
-        while True:
-            self.read_status()
-            self.send_commands()
 
     def deactivate(self):
         if self.eye1: self.eye1.deactivate()
