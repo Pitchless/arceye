@@ -260,8 +260,8 @@ class ArcEye(object):
     def __init__(self, port="/dev/ttyUSB0", config_file=None):
         self.port                  = port
         self.is_connected          = False
-        self.retry_connect_timeout = 123
-        self._retry_connect_count  = self.retry_connect_timeout
+        self.retry_connect_timeout = 3
+        self.connect_attempts      = 0
         self.command_rate          = 1
 
         # Add out joints (before config as they get configured)
@@ -295,7 +295,6 @@ class ArcEye(object):
         direct.
         """
         self.is_connected = False
-        self._retry_connect_count = self.retry_connect_timeout
         self.ser = Serial(self.port, 115200)
         sleep(3) # wait for the board to reset
         loginfo("Connected to %s"%self.port)
@@ -319,7 +318,7 @@ class ArcEye(object):
             self.bat_volt2 = float(values[4])
         except SerialException as e:
             self.is_connected = False
-            logerr("Serial exception (retry in %s): %s"%(self.retry_connect_timeout,e))
+            logerr("Serial (retry in %s): %s"%(self.retry_connect_timeout,e))
         except Exception as e:
             logerr(e)
 
@@ -335,7 +334,7 @@ class ArcEye(object):
             self.ser.write(cmd)
         except SerialException as e:
             self.is_connected = False
-            logerr("Serial exception (retry in %s): %s"%(self.retry_connect_timeout,e))
+            logerr("Serial (retry in %s): %s"%(self.retry_connect_timeout,e))
         except Exception as e:
             logerr(e)
         self.last_cmd = cmd
@@ -343,10 +342,15 @@ class ArcEye(object):
     def update(self):
         self.frame += 1
         try:
+            # Get a connection if we dont have one.
             if not self.is_connected:
-                self._retry_connect_count -= 1
-                if self._retry_connect_count < 0:
-                    return self.connect()
+                try:
+                    self.connect_attempts += 1
+                    self.connect()
+                except SerialException as e:
+                    logerr("Serial (attempt %s, retry in %s): %s"%(
+                        self.connect_attempts, self.retry_connect_timeout, e))
+                sleep(self.retry_connect_timeout)
 
             # We got a target
             if self.target:
@@ -371,8 +375,6 @@ class ArcEye(object):
                 if self.frame % self.config_rate == 0:
                     if os.stat(self.config_file).st_mtime > self.config_st_mtime:
                         self.reload_config()
-        except SerialException as e:
-            logerr("Serial exception (retry in %s): %s"%(self.retry_connect_timeout,e))
         except Exception as e:
             logerr(e)
 
