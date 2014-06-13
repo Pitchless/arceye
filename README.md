@@ -7,6 +7,14 @@ Versions
 --------
 These are git tags.
 
+v0.6 - 12th June 2014
+
+* Minimal viable installation!
+* Single application for both eyes.
+    * Threads.
+* Demos.
+* BUG: Hard to shutdown, need to kill -9
+
 v0.5 - 11th June 2014
 
 * The last one eye version.
