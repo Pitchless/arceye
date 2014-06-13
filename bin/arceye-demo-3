@@ -7,14 +7,7 @@ from arceye.gui import *
 gui = GuiDemo()
 gui.init()
 gui.start()
-
-while not gui.eyes.eye1.is_connected:
-    loginfo("Waiting for eye1")
-    sleep(1)
-
-while not gui.eyes.eye1.is_connected:
-    loginfo("Waiting for eye2")
-    sleep(1)
+gui.eyes.wait_for_connection()
 
 loginfo("Gentlemen start your engines...")
 i = 9

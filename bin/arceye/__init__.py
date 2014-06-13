@@ -446,6 +446,26 @@ class Robot(object):
                 logerr("Eye2 on same port as eye1")
                 self.eye2 = None
 
+    def wait_for_connection(self, retries=10):
+        if self.eye1:
+            count = 0
+            while not self.eye1.is_connected:
+                loginfo("Waiting for eye1")
+                sleep(1)
+                count += 1
+                if retries > 0 and count > retries:
+                    logerr("Giving up on eye1 connection")
+                    break
+        if self.eye2:
+            count = 0
+            while not self.eye2.is_connected:
+                loginfo("Waiting for eye2")
+                sleep(1)
+                count += 1
+                if retries > 0 and count > retries:
+                    logerr("Giving up on eye2 connection")
+                    break
+
     def read_status(self):
         if self.eye1: self.eye1.read_status()
         if self.eye2: self.eye2.read_status()
