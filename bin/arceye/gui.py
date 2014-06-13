@@ -110,7 +110,7 @@ class GuiBase(object):
             # Update the display
             self.screen.fill((0,0,0))
             self.guitxt.reset()
-            self.guitxt.color(255,255,0)
+            self.guitxt.color(0,255,0)
             if self.show_help:
                 self._display_help()
             else:
@@ -119,6 +119,7 @@ class GuiBase(object):
             pygame.display.flip()
 
     def _display_help(self):
+        self.guitxt.color(255,255,0)
         self.guitxt.text("**** Arcself.eye ***")
         self.guitxt.text("")
         self.guitxt.text("ESC - Quit")
@@ -136,11 +137,12 @@ class GuiBase(object):
         pass
 
     def display_header(self):
-        self.guitxt.text("Frame: %s"%self.frame)
+        self.guitxt.text("ArcEye Frame:%s"%self.frame)
         self.guitxt.text("")
 
     def display_eye(self, eye):
-        self.guitxt.text("Eye %s"%eye.port)
+        self.guitxt.color(255,255,0)
+        self.guitxt.text("EYE %s %s"%(eye.port,eye.config_file))
         self.guitxt.boolean("Connected", eye.is_connected)
         if eye.bat_volt1 < 18: # over
             self.guitxt.color(255,0,0)
@@ -159,7 +161,7 @@ class GuiBase(object):
         self.guitxt.indent()
         for j in eye.all_joints():
             self.guitxt.color(255,255,0)
-            self.guitxt.text(j.name)
+            self.guitxt.text(j.name.upper())
             self.guitxt.color(0,255,0)
             self.guitxt.indent()
             if j.pos > j.pos_max or j.pos < j.pos_min:
@@ -170,7 +172,8 @@ class GuiBase(object):
             self.guitxt.text("Command: %s"%j.command)
             self.guitxt.text("PWM: %s Dir:%s Reverse:%s"%(
                 j.get_pwm(),j.get_direction(), j.reverse))
-            self.guitxt.text("Brake: %s"%j.brake_cmd)
+            self.guitxt.boolean("Brake", j.brake_cmd,
+                    col_true=(0,255,0), col_false=(0,100,0))
             self.guitxt.color(0,255,0) if j.active else self.guitxt.color(0,100,0)
             self.guitxt.text("Active: %s"%j.active)
             self.guitxt.indent()
@@ -180,7 +183,7 @@ class GuiBase(object):
             self.guitxt.text("P:%s I:%s D:%s"%(j.pid.Kp, j.pid.Ki, j.pid.Kd))
             self.guitxt.unindent()
             self.guitxt.unindent()
-        self.guitxt.color(0,255,0)
+        self.guitxt.color(0,180,0)
         self.guitxt.text("")
         self.guitxt.text("Status %s"%eye.status)
         self.guitxt.text("Command %s"%eye.last_cmd)
