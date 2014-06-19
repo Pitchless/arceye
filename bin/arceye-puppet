@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-from random import randint
+from random import random, randint
 from arceye import *
 from arceye.gui import *
 
@@ -21,6 +21,8 @@ class ArcEyePuppet(GuiDemo):
         self.target = Target(0,0,None)
         self.min_blink_time = 2
         self.max_blink_time = 30
+        # Percentage of blinks that are winks
+        self.wink_percent = 0.1
 
     def init(self):
         super(ArcEyePuppet, self).init()
@@ -73,15 +75,18 @@ class ArcEyePuppet(GuiDemo):
 
     def _random(self):
         while self._is_random and not self.done:
-            self.blink(wait=True)
+            if random() <= self.wink_percent:
+                if randint(1,2) == 1:
+                    self.wink1(wait=True)
+                else:
+                    self.wink2(wait=True)
+            else:
+                self.blink(wait=True)
             blink_time = randint(self.min_blink_time, self.max_blink_time)
             loginfo("Next blink in %s"%blink_time)
             for i in range(0,blink_time):
                 if not self._is_random or self.done: return
                 sleep(1)
-
-    def wink(self):
-        return self.wink1()
 
     def wink1(self, wait=False):
         if self._wink1_thread is not None and self._wink1_thread.is_alive():
