@@ -29,7 +29,7 @@ class ArcEyePuppet(GuiDemo):
     def handle_event(self, event):
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_w:
-                self.wink()
+                self.wink1()
             elif event.key == pygame.K_e:
                 self.wink2()
             elif event.key == pygame.K_b:
@@ -83,28 +83,35 @@ class ArcEyePuppet(GuiDemo):
     def wink(self):
         return self.wink1()
 
-    def wink1(self):
+    def wink1(self, wait=False):
         if self._wink1_thread is not None and self._wink1_thread.is_alive():
             return False
         self._wink1_thread = Thread(target=self._wink1)
-        return self._wink1_thread.start()
+        self._wink1_thread.start()
+        if wait:
+            self._wink1_thread.join()
 
-    def wink2(self):
+    def wink2(self, wait=False):
         if self._wink2_thread is not None and self._wink2_thread.is_alive():
             return False
         self._wink2_thread = Thread(target=self._wink2)
-        return self._wink2_thread.start()
+        self._wink2_thread.start()
+        if wait:
+            self._wink2_thread.join()
 
     def _wink1(self):
         if not self.eyes.eye1: return
-        return self._wink(self.eyes.eye1)
+        loginfo("Wink1")
+        self._wink(self.eyes.eye1)
+        loginfo("Wink1 Done")
 
     def _wink2(self):
         if not self.eyes.eye2: return
-        return self._wink(self.eyes.eye2)
+        loginfo("Wink2")
+        self._wink(self.eyes.eye2)
+        loginfo("Wink2 Done")
 
     def _wink(self, eye):
-        loginfo("Wink")
         eye.go_to(l=0.7)
         sleep(2)
         eye.go_to(l=0.9)
@@ -115,7 +122,6 @@ class ArcEyePuppet(GuiDemo):
         sleep(1)
         eye.go_to(l=0.0)
         sleep(2)
-        loginfo("Done Wink")
 
     def blink(self, wait=False):
         if self._blink_thread is not None and self._blink_thread.is_alive():
