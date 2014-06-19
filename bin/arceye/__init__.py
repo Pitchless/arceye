@@ -24,6 +24,11 @@ def toggle(value):
         return False
     return True
 
+def clamp(val, minv=-1.0, maxv=1.0):
+    if val > maxv: return maxv
+    if val < minv: return minv
+    return val
+
 
 # The recipe gives simple implementation of a Discrete
 # Proportional-Integral-Derivative (PID) controller. PID controller gives output

@@ -5,11 +5,6 @@ from random import random, randint
 from arceye import *
 from arceye.gui import *
 
-def clamp(val, minv=-1.0, maxv=1.0):
-    if val > maxv: return maxv
-    if val < minv: return minv
-    return val
-
 class ArcEyePuppet(GuiDemo):
     def __init__(self, *args, **kw):
         super(ArcEyePuppet, self).__init__(*args, **kw)
