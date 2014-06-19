@@ -71,6 +71,7 @@ class GuiBase(object):
         loginfo("GUI Init - %s"%self.name)
         pygame.init()
         pygame.display.set_caption(self.name)
+        pygame.key.set_repeat(20,20)
         self.screen = pygame.display.set_mode( (self.w,self.h) )
         self.screen.fill((0, 0, 0))
         self.guitxt = GuiText(self.screen)
