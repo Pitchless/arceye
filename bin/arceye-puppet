@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+from random import randint
 from arceye import *
 from arceye.gui import *
 
@@ -15,7 +16,11 @@ class ArcEyePuppet(GuiDemo):
         self._wink1_thread = None
         self._wink2_thread = None
         self._blink_thread = None
+        self._random_thread = None
+        self._is_random = False
         self.target = Target(0,0,None)
+        self.min_blink_time = 10
+        self.max_blink_time = 30
 
     def init(self):
         super(ArcEyePuppet, self).init()
@@ -31,6 +36,11 @@ class ArcEyePuppet(GuiDemo):
                 self.blink()
             elif event.key == pygame.K_0:
                 self.target = Target(0,0,0)
+            elif event.key == pygame.K_r:
+                if self._is_random:
+                    self.stop_random()
+                else:
+                    self.start_random()
         if event.type == pygame.KEYDOWN:
             new_target = False
             if event.key == pygame.K_UP:
@@ -49,6 +59,27 @@ class ArcEyePuppet(GuiDemo):
             if new_target:
                 self.eyes.go_to(self.target.x, self.target.y)
 
+    def start_random(self):
+        loginfo("Start random")
+        if self._random_thread is not None and self._random_thread.is_alive():
+            return True
+        self._is_random = True
+        self._random_thread = Thread(target=self._random)
+        return self._random_thread.start()
+
+    def stop_random(self):
+        loginfo("Stop random")
+        self._is_random = False
+
+    def _random(self):
+        while self._is_random and not self.done:
+            self.blink()
+            blink_time = randint(self.min_blink_time, self.max_blink_time)
+            loginfo("Next blink in %s"%blink_time)
+            for i in range(0,blink_time):
+                if not self._is_random or self.done: return
+                sleep(1)
+
     def wink(self):
         return self.wink1()
 
@@ -57,16 +88,20 @@ class ArcEyePuppet(GuiDemo):
             return False
         self._wink1_thread = Thread(target=self._wink1)
         return self._wink1_thread.start()
-    
+
     def wink2(self):
         if self._wink2_thread is not None and self._wink2_thread.is_alive():
             return False
         self._wink2_thread = Thread(target=self._wink2)
         return self._wink2_thread.start()
 
-    def _wink1(self): return self._wink(self.eyes.eye1)
+    def _wink1(self):
+        if not self.eyes.eye1: return
+        return self._wink(self.eyes.eye1)
 
-    def _wink2(self): return self._wink(self.eyes.eye2)
+    def _wink2(self):
+        if not self.eyes.eye2: return
+        return self._wink(self.eyes.eye2)
 
     def _wink(self, eye):
         loginfo("Wink")
@@ -80,19 +115,21 @@ class ArcEyePuppet(GuiDemo):
         sleep(1)
         eye.go_to(l=0.0)
         sleep(2)
-        loginfo("Done")
-    
+        loginfo("Done Wink")
+
     def blink(self):
         if self._blink_thread is not None and self._blink_thread.is_alive():
             return False
         self._blink_thread = Thread(target=self._blink)
         return self._blink_thread.start()
 
-    def _blink(self):    
+    def _blink(self):
         t1 = Thread(target=self._wink1)
         t2 = Thread(target=self._wink2)
         t1.start()
         t2.start()
+        t1.join()
+        t2.join()
 
 demo = ArcEyePuppet()
 demo.init()
