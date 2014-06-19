@@ -19,7 +19,7 @@ class ArcEyePuppet(GuiDemo):
         self._random_thread = None
         self._is_random = False
         self.target = Target(0,0,None)
-        self.min_blink_time = 10
+        self.min_blink_time = 2
         self.max_blink_time = 30
 
     def init(self):
@@ -73,7 +73,7 @@ class ArcEyePuppet(GuiDemo):
 
     def _random(self):
         while self._is_random and not self.done:
-            self.blink()
+            self.blink(wait=True)
             blink_time = randint(self.min_blink_time, self.max_blink_time)
             loginfo("Next blink in %s"%blink_time)
             for i in range(0,blink_time):
@@ -117,19 +117,23 @@ class ArcEyePuppet(GuiDemo):
         sleep(2)
         loginfo("Done Wink")
 
-    def blink(self):
+    def blink(self, wait=False):
         if self._blink_thread is not None and self._blink_thread.is_alive():
             return False
         self._blink_thread = Thread(target=self._blink)
-        return self._blink_thread.start()
+        self._blink_thread.start()
+        if wait:
+            self._blink_thread.join()
 
     def _blink(self):
+        loginfo("Blink")
         t1 = Thread(target=self._wink1)
         t2 = Thread(target=self._wink2)
         t1.start()
         t2.start()
         t1.join()
         t2.join()
+        loginfo("Blink Done")
 
 demo = ArcEyePuppet()
 demo.init()
