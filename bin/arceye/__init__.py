@@ -483,6 +483,10 @@ class Robot(object):
         if self.eye1: self.eye1.update()
         if self.eye2: self.eye2.update()
 
+    def activate(self):
+        if self.eye1: self.eye1.activate()
+        if self.eye2: self.eye2.activate()
+
     def deactivate(self):
         if self.eye1: self.eye1.deactivate()
         if self.eye2: self.eye2.deactivate()
