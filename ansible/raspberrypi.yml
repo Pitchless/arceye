@@ -1,0 +1,28 @@
+---
+- hosts: raspberrypi
+  sudo: yes
+  vars:
+    packages:
+        - python-yaml
+        - python-serial
+        - python-pygame
+        - arduino
+        - htop
+        - xtail
+        - ccze
+        - vim
+  tasks:
+    - name: Install packages
+      apt: name={{item}}
+      with_items: packages
+
+    - name: Install arceye repo
+      git: repo=https://github.com/Pitchless/arceye.git
+           dest=/home/pi/arceye
+
+    - name: Fix perms
+      file: path=/home/pi/arceye recurse=yes owner=pi group=pi
+
+    - name: Auto start
+      lineinfile: dest=/etc/rc.local
+                  line="/home/pi/arceye/bin/auto-start &"

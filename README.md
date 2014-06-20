@@ -7,6 +7,8 @@ Versions
 --------
 These are git tags.
 
+* Ansible play to setup the pi.
+
 v0.7 - 13th June 2014
 
 * Better threads, proper shutdown fixed.
