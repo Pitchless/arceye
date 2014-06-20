@@ -3,6 +3,7 @@ import sys, os, datetime
 import yaml
 from time import sleep
 from threading import Thread
+from random import random, randint
 from arceye import *
 import pygame
 
@@ -195,6 +196,7 @@ class GuiBase(object):
         self.guitxt.text("Status %s"%eye.status)
         self.guitxt.text("Command %s"%eye.last_cmd)
 
+
 class GuiDemo(GuiBase):
     def init(self):
         super(GuiDemo, self).init()
@@ -233,3 +235,138 @@ class GuiDemo(GuiBase):
             self.guitxt.x = 300
             self.display_eye(self.eye2)
             self.guitxt.x = 10
+
+
+class ArcEyePuppet(GuiDemo):
+    def __init__(self, *args, **kw):
+        super(ArcEyePuppet, self).__init__(*args, **kw)
+        self._wink1_thread = None
+        self._wink2_thread = None
+        self._blink_thread = None
+        self._random_thread = None
+        self._is_random = False
+        self.target = Target(0,0,None)
+        self.min_blink_time = 2
+        self.max_blink_time = 30
+        # Percentage of blinks that are winks
+        self.wink_percent = 0.1
+
+    def handle_event(self, event):
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_w:
+                self.wink1()
+            elif event.key == pygame.K_e:
+                self.wink2()
+            elif event.key == pygame.K_b:
+                self.blink()
+            elif event.key == pygame.K_0:
+                self.target = Target(0,0,0)
+            elif event.key == pygame.K_r:
+                if self._is_random:
+                    self.stop_random()
+                else:
+                    self.start_random()
+        if event.type == pygame.KEYDOWN:
+            new_target = False
+            if event.key == pygame.K_UP:
+                self.target.y = clamp(self.target.y + 0.01)
+                new_target = True
+            if event.key == pygame.K_DOWN:
+                self.target.y = clamp(self.target.y - 0.01)
+                new_target = True
+            if event.key == pygame.K_RIGHT:
+                self.target.x = clamp(self.target.x + 0.01)
+                new_target = True
+            if event.key == pygame.K_LEFT:
+                self.target.x = clamp(self.target.x - 0.01)
+                new_target = True
+
+            if new_target:
+                self.eyes.go_to(self.target.x, self.target.y)
+
+    def start_random(self):
+        loginfo("Start random")
+        if self._random_thread is not None and self._random_thread.is_alive():
+            return True
+        self._is_random = True
+        self._random_thread = Thread(target=self._random)
+        return self._random_thread.start()
+
+    def stop_random(self):
+        loginfo("Stop random")
+        self._is_random = False
+
+    def _random(self):
+        while self._is_random and not self.done:
+            if random() <= self.wink_percent:
+                if randint(1,2) == 1:
+                    self.wink1(wait=True)
+                else:
+                    self.wink2(wait=True)
+            else:
+                self.blink(wait=True)
+            blink_time = randint(self.min_blink_time, self.max_blink_time)
+            loginfo("Next blink in %s"%blink_time)
+            for i in range(0,blink_time):
+                if not self._is_random or self.done: return
+                sleep(1)
+
+    def wink1(self, wait=False):
+        if self._wink1_thread is not None and self._wink1_thread.is_alive():
+            return False
+        self._wink1_thread = Thread(target=self._wink1)
+        self._wink1_thread.start()
+        if wait:
+            self._wink1_thread.join()
+
+    def wink2(self, wait=False):
+        if self._wink2_thread is not None and self._wink2_thread.is_alive():
+            return False
+        self._wink2_thread = Thread(target=self._wink2)
+        self._wink2_thread.start()
+        if wait:
+            self._wink2_thread.join()
+
+    def _wink1(self):
+        if not self.eyes.eye1: return
+        loginfo("Wink1")
+        self._wink(self.eyes.eye1)
+        loginfo("Wink1 Done")
+
+    def _wink2(self):
+        if not self.eyes.eye2: return
+        loginfo("Wink2")
+        self._wink(self.eyes.eye2)
+        loginfo("Wink2 Done")
+
+    def _wink(self, eye):
+        eye.go_to(l=0.7)
+        sleep(2)
+        eye.go_to(l=0.9)
+        #sleep(3)
+        sleep(3 + randint(0,2))
+        eye.go_to(l=0.4)
+        sleep(2)
+        eye.go_to(l=0.2)
+        sleep(1)
+        eye.go_to(l=0.0)
+        sleep(2)
+
+    def blink(self, wait=False):
+        if self._blink_thread is not None and self._blink_thread.is_alive():
+            return False
+        self._blink_thread = Thread(target=self._blink)
+        self._blink_thread.start()
+        if wait:
+            self._blink_thread.join()
+
+    def _blink(self):
+        loginfo("Blink")
+        t1 = Thread(target=self._wink1)
+        t2 = Thread(target=self._wink2)
+        t1.start()
+        t2.start()
+        t1.join()
+        t2.join()
+        loginfo("Blink Done")
+
