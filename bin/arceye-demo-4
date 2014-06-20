@@ -1,0 +1,50 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+from arceye import *
+from arceye.gui import *
+
+demo = ArcEyePuppet()
+demo.init()
+demo.start()
+demo.eyes.wait_for_connection()
+sleep(1)
+loginfo("GO")
+demo.eyes.activate()
+
+loginfo("Going to zero...")
+demo.eyes.go_to(0.0, 0.0, 0.0, s=10)
+loginfo("Done")
+
+# Time between blink/wink in seconds
+demo.min_blink_time = 2
+demo.max_blink_time = 30
+# Percentage of blinks that are winks 0..1
+demo.wink_percent = 0.1
+demo.start_random()
+
+loginfo("Looping...")
+while not demo.done:
+    loginfo("Hello")
+
+    demo.eyes.go_to( 0.8,  0.0, s=2) #(-left +right, -up, +down) from front
+    demo.eyes.go_to( 0.6,  0.0, s=2) #(-left +right, -up, +down) from front
+    demo.eyes.go_to( 0.2,  0.0, s=2) #(-left +right, -up, +down) from front
+    demo.eyes.go_to(-0.2,  0.0, s=2) #(-left +right, -up, +down) from front
+    demo.eyes.go_to(-0.6,  0.0, s=2) #(-left +right, -up, +down) from front
+    demo.eyes.go_to(-0.8,  0.0, s=4) #(-left +right, -up, +down) from front
+    demo.eyes.go_to(-0.6, -0.2, s=2) #(-left +right, -up, +down) from front
+    demo.eyes.go_to( 0.8,  0.8, s=2) #(-left +right, -up, +down) from front
+    demo.eyes.go_to( 0.8,  0.6, s=5) #(-left +right, -up, +down) from front
+    demo.eyes.go_to( 0.2, -0.8, s=3) #(-left +right, -up, +down) from front
+    demo.eyes.go_to( 0.6, -0.8, s=2) #(-left +right, -up, +down) from front
+    demo.eyes.go_to( 0.8, -0.6, s=4) #(-left +right, -up, +down) from front
+
+    # Cross eye
+    demo.eyes.eye1.go_to( 0.8,  0.0)
+    demo.eyes.eye2.go_to( -0.8,  0.0)
+    sleep(5)
+
+    demo.eyes.go_to( 0.0,  0.0, s=3) #(-left +right, -up, +down) from front
+
+demo.eyes.deactivate()
