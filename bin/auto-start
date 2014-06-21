@@ -5,3 +5,4 @@ echo Starting arceye
 cd /home/pi/arceye/bin
 #./arceye-commander eye2.yaml eye1.yaml 1>>/home/pi/arceye.log 2>&1 
 ./arceye-demo-3 eye2.yaml eye1.yaml 1>>/home/pi/arceye.log 2>&1 
+#./arceye-demo-3 eye2.yaml eye1.yaml 1>>/home/pi/arceye.log 2>&1 
