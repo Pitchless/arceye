@@ -11,6 +11,23 @@ arceye-demo-4 - looks a bit like demo 3, you can edit the sameway, difference
 
 Puppet. r - turns the random wink/blink on and off.
 
+Auto Run
+--------
+
+The bin/auto_run file is used on the pi at startup. Edit this to set the demo
+to launch.
+
+When run this way it will log out put to /home/pi/arceye.log.
+If it starts having problems can look in there. Use:
+  cat /home/pi/arceye.log
+to see it all or:
+  less /home/pi/arceye.log
+to be able to see what is in the log.
+
+To test changes to the auto run, just run in like the arceye programs. e.g.
+  cd arceye
+  ./bin/auto_start
+
 Versions
 --------
 These are git tags.
