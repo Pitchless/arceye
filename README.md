@@ -3,6 +3,14 @@ arceye
 
 The Eyes!
 
+arceye-demo-3 - the demo you guys built on the river bank.
+
+arceye-demo-4 - looks a bit like demo 3, you can edit the sameway, difference
+                is that it will randomly wink and blink so you can just script
+                eye motions.
+
+Puppet. r - turns the random wink/blink on and off.
+
 Versions
 --------
 These are git tags.
