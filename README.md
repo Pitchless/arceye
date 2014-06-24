@@ -33,6 +33,7 @@ Versions
 These are git tags.
 
 * Ansible play to setup the pi.
+* Keep alive in command for arduino.
 
 v0.7 - 13th June 2014
 
