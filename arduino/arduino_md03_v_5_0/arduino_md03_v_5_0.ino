@@ -58,6 +58,7 @@ long interval = 50; // time between lcd updates
 int lowBattCon = 0; //
 int battReading1 = 0;
 int battReading2 = 0;
+int keepAlive = 0;
 
 struct Status {
   int yaw_pos;
@@ -80,9 +81,9 @@ struct Command {
   boolean lid_brake;
 
 };
-
+  
 Status stat = { 0, 0, 0 };
-Command cmd = { 0, true, 0, true, 0, true, LOW };
+Command cmd = { 0, HIGH, 0, HIGH, 0, HIGH, LOW };
 
 //struct Joint {
 //  String name;
@@ -119,6 +120,9 @@ void setup(){
   pinMode(rlyPin1,OUTPUT); // Setup pins
   pinMode(rlyPin2,OUTPUT); // Setup pins
   pinMode(rlyPin3,OUTPUT); // Setup pins
+  pinMode(motorPinSpeed1,OUTPUT); // Setup pins
+  pinMode(motorPinSpeed2,OUTPUT); // Setup pins
+  pinMode(motorPinSpeed3,OUTPUT); // Setup pins  
   pinMode(motorPinDir1,OUTPUT); // Setup pins
   pinMode(motorPinDir2,OUTPUT); // Setup pins
   pinMode(motorPinDir3,OUTPUT); // Setup pins
@@ -208,6 +212,9 @@ void read_command() {
         case 8:
           cmd.lid_brake = (value == "1" ? HIGH : LOW);
           break;
+        case 9:
+          keepAlive = value.toInt();
+          break;
         default:
           break;
       }
@@ -230,12 +237,15 @@ void lcd_command() {
 
 // Send command to the motors
 void do_command() {
-  analogWrite(motorPinSpeed1, cmd.pitch_pwm);
-  digitalWrite(motorPinDir1, cmd.pitch_direction);
-  analogWrite(motorPinSpeed2, cmd.yaw_pwm);
-  digitalWrite(motorPinDir2, cmd.yaw_direction);
-  analogWrite(motorPinSpeed3, cmd.lid_pwm);
-  digitalWrite(motorPinDir3, cmd.lid_direction);
+  if (keepAlive == 42) {
+    analogWrite(motorPinSpeed1, cmd.pitch_pwm);
+    digitalWrite(motorPinDir1, cmd.pitch_direction);
+    analogWrite(motorPinSpeed2, cmd.yaw_pwm);
+    digitalWrite(motorPinDir2, cmd.yaw_direction);
+    analogWrite(motorPinSpeed3, cmd.lid_pwm);
+    digitalWrite(motorPinDir3, cmd.lid_direction);
+    keepAlive = 0;
+  }
 
   // Brakes
   digitalWrite(rlyPin2, cmd.yaw_brake);
