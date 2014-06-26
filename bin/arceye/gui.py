@@ -2,6 +2,7 @@ from __future__ import print_function
 import sys, os, datetime
 import yaml
 from time import sleep
+from datetime import datetime
 from threading import Thread
 from random import random, randint
 from arceye import *
@@ -32,15 +33,19 @@ class GuiText(object):
         self.x = 10
         self.y = 10
         self.line_height = 15
+        return self
 
     def indent(self):
         self.x += 10
+        return self
 
     def unindent(self):
         self.x -= 10
+        return self
 
     def color(self,r,g,b):
         self.text_color = (r,g,b)
+        return self
 
     def font(self,name,size=12):
         self._font = pygame.font.Font(pygame.font.match_font(name), size)
@@ -48,6 +53,7 @@ class GuiText(object):
     
     def integer(self, name, value):
         self.text("%s: %s"%(name,int(value)))
+        return self
 
     def boolean(self, name, value, col_true=(0,255,0), col_false=(255,0,0)):
         old_col = self.text_color
@@ -57,10 +63,14 @@ class GuiText(object):
             self.text_color = col_false
         self.text("%s: %s"%(name, value))
         self.text_color = old_col
+        return self
 
 
 class GuiBase(object):
     def __init__(self, name = "ArcEye", w=640, h=640, config1=None, config2=None, argv=sys.argv):
+        self.progname   = os.path.basename(sys.argv[0])
+        self.start_time = datetime.datetime.now()
+        self.now        = self.start_time
         if len(argv) > 1:
             config1 = argv[1]
         if len(argv) > 2:
@@ -90,6 +100,7 @@ class GuiBase(object):
         self.guitxt = GuiText(self.screen)
         #loginfo("Fonts: %s"%pygame.font.get_fonts())
         self.guitxt.font("droidsansmono", 14)
+        self.now = datetime.datetime.now()
 
     def run(self, thread=False):
         if not thread:
@@ -107,7 +118,9 @@ class GuiBase(object):
     def run(self):
         """Run the GUI, blocks until self.done is True."""
         while not self.done:
-            self.frame += 1
+            self.frame  += 1
+            self.now     = datetime.datetime.now()
+            self.up_time = self.now - self.start_time
             # Check for gui events
             for event in pygame.event.get(): # User did something
                 if event.type == pygame.QUIT: # If user clicked close
@@ -161,7 +174,13 @@ class GuiBase(object):
         pass
 
     def display_header(self):
-        self.guitxt.text("ArcEye (%s) Frame:%s"%(sys.argv[0], self.frame))
+        hours, remainder = divmod(self.up_time.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        self.guitxt.color(200,200,0).text("%s - %s - Frame:%s Now:%s Start:%s Up:%s:%s.%s"%(
+            self.name, self.progname, self.frame,
+            self.now.strftime("%H:%m.%S"), self.start_time.strftime("%H:%m.%S"),
+            hours, minutes, seconds
+            ))
         self.guitxt.text("")
 
     def display_eye(self, eye):
