@@ -311,6 +311,9 @@ class ArcEye(object):
         self.target    = None
         self.thread    = None
 
+        self.reset_frames = 10
+        self._resetting = 0
+
     def all_joints(self): return (self.yaw, self.pitch, self.lid)
 
     def connect(self):
@@ -349,15 +352,23 @@ class ArcEye(object):
         except Exception as e:
             logerr(e)
 
+    def reset():
+        self._resetting = self.reset_frames
+
     def send_commands(self):
         if not self.is_connected: return
-        # 42 is a keep alive for the motors
-        cmd = ""
-        cmd = "%s,%s,%s,%s,%s,%s,%s,%s,%s,42,\n"%(
-            self.yaw.get_pwm(), self.yaw.get_direction(), self.yaw.get_brake_cmd(),
-            self.pitch.get_pwm(), self.pitch.get_direction(), self.pitch.get_brake_cmd(),
-            self.lid.get_pwm(), self.lid.get_direction(), self.lid.get_brake_cmd(),
-                )
+        if self._resetting > 0:
+            self._resetting -= 1
+            vals = [0,0,0,0,0,0,0,0,0,0]
+        else:
+            # 42 is a keep alive for the motors
+            vals = (
+                self.yaw.get_pwm(), self.yaw.get_direction(), self.yaw.get_brake_cmd(),
+                self.pitch.get_pwm(), self.pitch.get_direction(), self.pitch.get_brake_cmd(),
+                self.lid.get_pwm(), self.lid.get_direction(), self.lid.get_brake_cmd(),
+                42
+            )
+        cmd = "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,\n"%vals
         try:
             self.ser.write(cmd)
         except SerialException as e:
