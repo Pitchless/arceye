@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
-import sys, os
+import sys, os, textwrap
 import yaml
 from copy import copy
 from arceye import *
@@ -204,13 +204,22 @@ class Commander(GuiBase):
 
     def display_logs(self):
         self.guitxt.font("droidsansmono", 11)
+        self.guitxt.color(0,255,0)
         msgs = copy(self.messages)
         msgs.reverse()
         for msg in msgs:
-            self.guitxt.color(0,255,0)
-            if msg.level == "ERROR":
-                self.guitxt.color(255,0,0)
-            self.guitxt.text("[%s] %05s : %s"%(msg.dt.strftime("%H%m.%s"), msg.level,msg.msg))
+            if msg.level == "ERROR": self.guitxt.color(255,0,0)
+            else: self.guitxt.color(0,255,0)
+            lines = textwrap.wrap(msg.msg, width=68)
+            if not len(lines) > 0:
+                continue
+            self.guitxt.text("[%s] %05s : %s"%(
+                msg.dt.strftime("%H%m.%s"), msg.level, lines[0]))
+            self.guitxt.indent()
+            for l in lines[1:]:
+                self.guitxt.text(l)
+            self.guitxt.unindent()
+            self.guitxt.y = self.guitxt.y+2
 
 gui = Commander(config1=config_file, config2=config_file_2)
 gui.init()
