@@ -73,8 +73,8 @@ class Commander(GuiBase):
         except pygame.error as e:
             logerr("Joystick fail %s"%e)
 
-    def _log_cb(self, dt, level, msg):
-        self.messages.append((dt,level,msg))
+    def _log_cb(self, msg):
+        self.messages.append(msg)
 
     def handle_event(self, event):
         # Keys
@@ -203,13 +203,14 @@ class Commander(GuiBase):
             self.guitxt.x = 10
 
     def display_logs(self):
+        self.guitxt.font("droidsansmono", 11)
         msgs = copy(self.messages)
         msgs.reverse()
-        for msg in msgs[:32]:
+        for msg in msgs:
             self.guitxt.color(0,255,0)
-            if msg[1] == "ERROR":
+            if msg.level == "ERROR":
                 self.guitxt.color(255,0,0)
-            self.guitxt.text("%s : %s"%(msg[1],msg[2]))
+            self.guitxt.text("[%s] %05s : %s"%(msg.dt.strftime("%H%m.%s"), msg.level,msg.msg))
 
 gui = Commander(config1=config_file, config2=config_file_2)
 gui.init()

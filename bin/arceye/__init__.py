@@ -8,6 +8,16 @@ from threading import Thread
 #
 # Logging util
 #
+class LogMsg(object):
+    def __init__(self, level, msg):
+        self.dt    = datetime.datetime.now()
+        self.level = level
+        self.msg   = msg
+
+    def __repr__(self):
+        return "[%s] %05s : %s"%(self.dt, self.level, self.msg)
+
+
 _log_callbacks = []
 
 def loginfo(msg):
@@ -17,10 +27,10 @@ def logerr(msg):
     logmsg("ERROR", msg)
 
 def logmsg(level, msg):
-    dt = datetime.datetime.now()
+    msg = LogMsg(level, msg)
     for cb in _log_callbacks:
-        cb(dt, level, msg)
-    print("[%s] %s:"%(dt, level), msg, file=sys.stderr)
+        cb(msg)
+    print(msg, file=sys.stderr)
 
 def log_add_callback(cb):
     _log_callbacks.append(cb)

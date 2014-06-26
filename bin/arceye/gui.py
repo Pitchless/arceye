@@ -113,6 +113,7 @@ class GuiBase(object):
             # Update the display
             self.screen.fill((0,0,0))
             self.guitxt.reset()
+            self.guitxt.font("droidsansmono", 14)
             self.guitxt.color(0,255,0)
             if self.show_help:
                 self._display_help()
