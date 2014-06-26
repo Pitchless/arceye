@@ -8,13 +8,22 @@ from threading import Thread
 #
 # Logging util
 #
+_log_callbacks = []
 
-def loginfo(*msg):
-    print("[%s] INFO: "%datetime.datetime.now(), *msg, file=sys.stderr)
+def loginfo(msg):
+    logmsg("INFO", msg)
 
-def logerr(*msg):
-    print("[%s] ERROR:"%datetime.datetime.now(), *msg, file=sys.stderr)
+def logerr(msg):
+    logmsg("ERROR", msg)
 
+def logmsg(level, msg):
+    dt = datetime.datetime.now()
+    for cb in _log_callbacks:
+        cb(dt, level, msg)
+    print("[%s] %s:"%(dt, level), msg, file=sys.stderr)
+
+def log_add_callback(cb):
+    _log_callbacks.append(cb)
 
 #
 # Util
