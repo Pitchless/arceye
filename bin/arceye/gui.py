@@ -126,6 +126,9 @@ class GuiBase(object):
         self.done = True
         pygame.display.quit()
 
+    def display(self):
+        pass
+
     def _display_help(self):
         self.guitxt.color(255,255,0)
         self.guitxt.text("**** Arcself.eye ***")

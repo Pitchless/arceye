@@ -54,6 +54,7 @@ class Commander(GuiBase):
         super(Commander, self).__init__(*args, **kw)
         self.w = 640
         self.h = 640
+        self.page = "main"
 
     def init(self):
         super(Commander, self).init()
@@ -68,6 +69,12 @@ class Commander(GuiBase):
             logerr("Joystick fail %s"%e)
 
     def handle_event(self, event):
+        # Keys
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_F1: self.page = "help"
+            if event.key == pygame.K_F2: self.page = "main"
+            if event.key == pygame.K_F3: self.page = "log"
+
         # Joystick and other events
         if event.type == pygame.JOYAXISMOTION:
             joy_axis_command(self.eye.yaw, dead_zoned(self.joystick.get_axis(yaw_axis)));
@@ -172,6 +179,12 @@ class Commander(GuiBase):
         self.guitxt.text("Left Trigger - lid")
 
     def display(self):
+        if self.page == "log":
+            self.display_logs()
+        else:
+            self.display_main()
+
+    def display_main(self):
         # Update the display
         if self.eye1:
             self.display_eye(self.eye1)
@@ -180,6 +193,9 @@ class Commander(GuiBase):
             self.guitxt.x = 300
             self.display_eye(self.eye2)
             self.guitxt.x = 10
+
+    def display_logs(self):
+        self.guitxt.text("Logs")
 
 gui = Commander(config1=config_file, config2=config_file_2)
 gui.init()
