@@ -313,6 +313,7 @@ class ArcEye(object):
 
         self.reset_frames = 10
         self._resetting = 0
+        loginfo("Started eye on %s with %s"%(port,config_file))
 
     def all_joints(self): return (self.yaw, self.pitch, self.lid)
 
