@@ -14,6 +14,9 @@ class GuiText(object):
         self.screen     = screen
         self._font      = pygame.font.Font(None, 20) if not font else font
         self.text_color = text_color
+    
+    def br(self):
+        self.y += self.line_height
 
     def text(self, textString, nl=True):
         textBitmap = self._font.render(textString, True, self.text_color)
@@ -22,6 +25,7 @@ class GuiText(object):
             self.y += self.line_height
         else:
             self.x += textBitmap.get_width()
+        return self
 
     def reset(self):
         self.x = 10

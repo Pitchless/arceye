@@ -173,6 +173,7 @@ class Commander(GuiBase):
             self.eye2.lid.toggle_active()
 
     def display_help(self):
+        self.guitxt.text("F1,F2,F3 - Help, main and log screens.").br()
         self.guitxt.text("SPACE   - Zero commands and controllers.")
         self.guitxt.text("w,a,s,d - eye1 yaw, pitch")
         self.guitxt.text("q,e     - eye1 lid")
@@ -204,6 +205,18 @@ class Commander(GuiBase):
             self.guitxt.x = 300
             self.display_eye(self.eye2)
             self.guitxt.x = 10
+        self.guitxt.br()
+        self.guitxt.font("droidsansmono", 11)
+        msgs = copy(self.messages)
+        msgs.reverse()
+        if len(msgs):
+            num = 5 if len(msgs) > 5 else len(msgs)
+            for i in range(0,num):
+                msg = msgs[i]
+                if msg.level == "ERROR": self.guitxt.color(200,0,0)
+                else: self.guitxt.color(0,200,0)
+                self.guitxt.text("[%s] %05s : %s"%(
+                    msg.dt.strftime("%H%m.%s"), msg.level, msg.msg))
 
     def display_logs(self):
         self.guitxt.font("droidsansmono", 11)
