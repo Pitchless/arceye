@@ -15,10 +15,13 @@ class GuiText(object):
         self._font      = pygame.font.Font(None, 20) if not font else font
         self.text_color = text_color
 
-    def text(self, textString):
+    def text(self, textString, nl=True):
         textBitmap = self._font.render(textString, True, self.text_color)
         self.screen.blit(textBitmap, [self.x, self.y])
-        self.y += self.line_height
+        if nl:
+            self.y += self.line_height
+        else:
+            self.x += textBitmap.get_width()
 
     def reset(self):
         self.x = 10
@@ -156,26 +159,32 @@ class GuiBase(object):
         self.guitxt.color(255,255,0)
         self.guitxt.text("EYE %s %s"%(eye.port,eye.config_file))
         self.guitxt.boolean("Connected", eye.is_connected)
+        old_x = self.guitxt.x
+        self.guitxt.color(0,255,0)
+        self.guitxt.text("Battery: ", nl=False)
         if eye.bat_volt1 < 18: # over
             self.guitxt.color(255,0,0)
         if eye.bat_volt1 < 14: # normal
             self.guitxt.color(0,255,0)
         if eye.bat_volt1 < 11: # under
             self.guitxt.color(255,123,0)
-        self.guitxt.text("Battery Volt 1: %s"%eye.bat_volt1)
+        self.guitxt.text("Volt1:%s "%eye.bat_volt1, nl=False)
         if eye.bat_volt2 < 18: # over
             self.guitxt.color(255,0,0)
         if eye.bat_volt2 < 14: # normal
             self.guitxt.color(0,255,0)
         if eye.bat_volt2 < 11: # under
             self.guitxt.color(255,123,0)
-        self.guitxt.text("Battery Volt 2: %s"%eye.bat_volt2)
+        self.guitxt.text("Volt2:%s"%eye.bat_volt2)
+        self.guitxt.x = old_x
+        self.guitxt.color(0,180,0)
+        self.guitxt.text("Stat:%s Cmd:%s"%(eye.status, eye.last_cmd))
         self.guitxt.indent()
         for j in eye.all_joints():
             self.guitxt.color(255,255,0)
             self.guitxt.text(j.name.upper())
-            self.guitxt.color(0,255,0)
             self.guitxt.indent()
+            self.guitxt.color(0,255,0)
             if j.pos > j.pos_max or j.pos < j.pos_min:
                 self.guitxt.color(255,0,0)
             self.guitxt.text("Pos raw: " + str(j.pos_raw))
@@ -191,14 +200,10 @@ class GuiBase(object):
             self.guitxt.indent()
             self.guitxt.text("Target: %s"%j.target)
             self.guitxt.text("Error: %s"%j.error)
-            self.guitxt.text("Deadzone: %s"%j.deadzone)
+            #self.guitxt.text("Deadzone: %s"%j.deadzone)
             self.guitxt.text("P:%s I:%s D:%s"%(j.pid.Kp, j.pid.Ki, j.pid.Kd))
             self.guitxt.unindent()
             self.guitxt.unindent()
-        self.guitxt.color(0,180,0)
-        self.guitxt.text("")
-        self.guitxt.text("Status %s"%eye.status)
-        self.guitxt.text("Command %s"%eye.last_cmd)
 
 
 class GuiDemo(GuiBase):
