@@ -85,6 +85,8 @@ class Commander(GuiBase):
             if event.key == pygame.K_F1: self.page = "help"
             if event.key == pygame.K_F2: self.page = "main"
             if event.key == pygame.K_F3: self.page = "log"
+            if event.key == pygame.K_r:
+                self.eyes.reset()
 
         # Joystick and other events
         if event.type == pygame.JOYAXISMOTION:
@@ -185,6 +187,7 @@ class Commander(GuiBase):
         self.guitxt.text("Z,X,C   - eye1 yaw,pitch,lid brake on")
         self.guitxt.text("b,n,m   - eye2 yaw,pitch,lid brake on")
         self.guitxt.text("B,N,M   - eye2 yaw,pitch,lid brake on")
+        self.guitxt.text("r       - send reset")
         self.guitxt.text("")
         self.guitxt.text("Left Stick - yaw")
         self.guitxt.text("Right Stick - pitch")
@@ -205,7 +208,6 @@ class Commander(GuiBase):
             self.guitxt.x = 300
             self.display_eye(self.eye2)
             self.guitxt.x = 10
-        self.guitxt.br()
         self.guitxt.font("droidsansmono", 11)
         msgs = copy(self.messages)
         msgs.reverse()

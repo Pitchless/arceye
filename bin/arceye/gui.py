@@ -17,6 +17,7 @@ class GuiText(object):
     
     def br(self):
         self.y += self.line_height
+        return self
 
     def text(self, textString, nl=True):
         textBitmap = self._font.render(textString, True, self.text_color)
@@ -43,6 +44,10 @@ class GuiText(object):
 
     def font(self,name,size=12):
         self._font = pygame.font.Font(pygame.font.match_font(name), size)
+        return self
+    
+    def integer(self, name, value):
+        self.text("%s: %s"%(name,int(value)))
 
     def boolean(self, name, value, col_true=(0,255,0), col_false=(255,0,0)):
         old_col = self.text_color
@@ -160,9 +165,12 @@ class GuiBase(object):
         self.guitxt.text("")
 
     def display_eye(self, eye):
+        self.guitxt.font("droidsansmono", 13)
         self.guitxt.color(255,255,0)
         self.guitxt.text("EYE %s %s"%(eye.port,eye.config_file))
+        self.guitxt.color(0,255,0)
         self.guitxt.boolean("Connected", eye.is_connected)
+        self.guitxt.integer("Frame", eye.frame)
         old_x = self.guitxt.x
         self.guitxt.color(0,255,0)
         self.guitxt.text("Battery: ", nl=False)
@@ -181,9 +189,6 @@ class GuiBase(object):
             self.guitxt.color(255,123,0)
         self.guitxt.text("Volt2:%s"%eye.bat_volt2)
         self.guitxt.x = old_x
-        self.guitxt.color(0,180,0)
-        self.guitxt.text("Stat:%s Cmd:%s"%(eye.status, eye.last_cmd))
-        self.guitxt.indent()
         for j in eye.all_joints():
             self.guitxt.color(255,255,0)
             self.guitxt.text(j.name.upper())
@@ -208,6 +213,8 @@ class GuiBase(object):
             self.guitxt.text("P:%s I:%s D:%s"%(j.pid.Kp, j.pid.Ki, j.pid.Kd))
             self.guitxt.unindent()
             self.guitxt.unindent()
+            self.guitxt.color(0,180,0)
+        self.guitxt.font("droidsansmono", 10).br().text("Stat:%s Cmd:%s"%(eye.status, eye.last_cmd))
 
 
 class GuiDemo(GuiBase):

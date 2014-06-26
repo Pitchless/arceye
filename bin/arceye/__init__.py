@@ -352,14 +352,15 @@ class ArcEye(object):
         except Exception as e:
             logerr(e)
 
-    def reset():
+    def reset(self):
+        loginfo("Sending reset")
         self._resetting = self.reset_frames
 
     def send_commands(self):
         if not self.is_connected: return
         if self._resetting > 0:
             self._resetting -= 1
-            vals = [0,0,0,0,0,0,0,0,0,0]
+            vals = (0,0,0,0,0,0,0,0,0,0)
         else:
             # 42 is a keep alive for the motors
             vals = (
@@ -440,6 +441,7 @@ class ArcEye(object):
         """Update with the new config, dict of dicts etc, return from yaml parse"""
         if config is None: return
         if config.has_key('port')         : self.port = config['port']
+        if config.has_key('reset_frames') : self.reset_frames = config['lid']
         if config.has_key('command_rate') : self.command_rate = config['command_rate']
         # Joints
         if config.has_key('yaw')          : self.yaw.update_config(config['yaw'])
@@ -520,6 +522,10 @@ class Robot(object):
     def deactivate(self):
         if self.eye1: self.eye1.deactivate()
         if self.eye2: self.eye2.deactivate()
+
+    def reset(self):
+        if self.eye1: self.eye1.reset()
+        if self.eye2: self.eye2.reset()
 
     def zero_target(self):
         if self.eye1:
