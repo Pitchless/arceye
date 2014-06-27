@@ -176,9 +176,9 @@ class GuiBase(object):
     def display_header(self):
         hours, remainder = divmod(self.up_time.seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
-        self.guitxt.color(200,200,0).text("%s - %s - Frame:%s Now:%s Start:%s Up:%s:%s.%s"%(
-            self.name, self.progname, self.frame,
-            self.now.strftime("%H:%m.%S"), self.start_time.strftime("%H:%m.%S"),
+        self.guitxt.color(200,200,0).text("%s - %s - %s Up:%sh %sm %ss"%(
+            self.name, self.progname,
+            self.now.strftime("%H:%m.%S"),
             hours, minutes, seconds
             ))
         self.guitxt.text("")
